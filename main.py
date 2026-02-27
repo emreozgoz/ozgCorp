@@ -15,6 +15,10 @@ from src.systems.movement_system import MovementSystem, PlayerInputSystem
 from src.systems.combat_system import AutoAttackSystem, ProjectileSystem, DamageOnContactSystem
 from src.systems.spawn_system import WaveSpawnSystem, AISystem, DeathSystem
 from src.systems.render_system import RenderSystem
+from src.systems.ability_system import (
+    AbilityInputSystem, HomingMissileSystem,
+    StatusEffectSystem, LifetimeSystem
+)
 from config.settings import *
 
 
@@ -81,11 +85,15 @@ class DarkSanctum:
 
     def _init_systems(self):
         """Initialize all game systems"""
-        # Input (priority 5)
+        # Input (priority 5-6)
         self.world.add_system(PlayerInputSystem(self.world))
+        self.world.add_system(AbilityInputSystem(self.world))
 
         # Movement (priority 10)
         self.world.add_system(MovementSystem(self.world))
+
+        # Status Effects (priority 15)
+        self.world.add_system(StatusEffectSystem(self.world))
 
         # AI (priority 25)
         self.world.add_system(AISystem(self.world))
@@ -93,6 +101,7 @@ class DarkSanctum:
         # Combat (priority 30-40)
         self.world.add_system(AutoAttackSystem(self.world))
         self.world.add_system(ProjectileSystem(self.world))
+        self.world.add_system(HomingMissileSystem(self.world))
         self.world.add_system(DamageOnContactSystem(self.world))
 
         # Spawning (priority 50)
@@ -100,6 +109,9 @@ class DarkSanctum:
 
         # Death (priority 60)
         self.world.add_system(DeathSystem(self.world))
+
+        # Lifetime (priority 65)
+        self.world.add_system(LifetimeSystem(self.world))
 
         # Rendering (priority 100)
         self.world.add_system(RenderSystem(self.world, self.screen))

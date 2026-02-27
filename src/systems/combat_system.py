@@ -137,6 +137,10 @@ class ProjectileSystem(System):
             entity_size = entity.get_component(Size)
 
             if self._aabb_collision(proj_pos, proj_size, entity_pos, entity_size):
+                # Check if target is invulnerable
+                if entity.has_component(Invulnerable):
+                    continue
+
                 # Deal damage
                 health = entity.get_component(Health)
                 health.damage(projectile.damage)
@@ -214,8 +218,11 @@ class DamageOnContactSystem(System):
                     health1 = e1.get_component(Health)
                     health2 = e2.get_component(Health)
 
-                    health1.damage(damage2.amount)
-                    health2.damage(damage1.amount)
+                    # Check invulnerability
+                    if not e1.has_component(Invulnerable):
+                        health1.damage(damage2.amount)
+                    if not e2.has_component(Invulnerable):
+                        health2.damage(damage1.amount)
 
                     # Set cooldown (0.5s between damage ticks)
                     self.damage_cooldown[key] = 0.5

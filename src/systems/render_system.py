@@ -162,6 +162,75 @@ class RenderSystem(System):
         text_rect.topright = (WINDOW_WIDTH - 20, 20)
         self.screen.blit(enemy_surf, text_rect)
 
+        # === ABILITY COOLDOWNS (Bottom Center) ===
+        abilities = player.get_component(Abilities)
+        self._render_abilities(abilities)
+
+    def _render_abilities(self, abilities: Abilities):
+        """Render ability cooldowns"""
+        ability_keys = ['Q', 'W', 'E', 'R']
+        ability_names = ['Dash', 'Nova', 'Missiles', 'Freeze']
+        ability_colors = [
+            (150, 100, 255),  # Q - Purple (mobility)
+            (180, 20, 20),    # W - Red (damage)
+            (80, 120, 255),   # E - Blue (burst)
+            (255, 215, 0)     # R - Gold (ultimate)
+        ]
+
+        # Position at bottom center
+        slot_size = 50
+        slot_spacing = 10
+        total_width = len(ability_keys) * (slot_size + slot_spacing)
+        start_x = (WINDOW_WIDTH - total_width) // 2
+        y = WINDOW_HEIGHT - 80
+
+        for i, key in enumerate(ability_keys):
+            x = start_x + i * (slot_size + slot_spacing)
+
+            # Background slot
+            slot_rect = pygame.Rect(x, y, slot_size, slot_size)
+            pygame.draw.rect(self.screen, (30, 20, 40), slot_rect)
+            pygame.draw.rect(self.screen, ability_colors[i], slot_rect, 2)
+
+            # Cooldown overlay
+            cooldown = abilities.cooldowns[key]
+            if cooldown > 0:
+                # Calculate cooldown percentage
+                max_cooldown = {
+                    'Q': ABILITY_Q_COOLDOWN,
+                    'W': ABILITY_W_COOLDOWN,
+                    'E': ABILITY_E_COOLDOWN,
+                    'R': ABILITY_R_COOLDOWN
+                }[key]
+
+                cd_percent = cooldown / max_cooldown
+                overlay_height = int(slot_size * cd_percent)
+
+                # Dark overlay
+                if overlay_height > 0:
+                    overlay_rect = pygame.Rect(x, y + (slot_size - overlay_height),
+                                               slot_size, overlay_height)
+                    overlay_surf = pygame.Surface((slot_size, overlay_height))
+                    overlay_surf.set_alpha(180)
+                    overlay_surf.fill((10, 5, 15))
+                    self.screen.blit(overlay_surf, overlay_rect)
+
+                # Cooldown text
+                cd_text = f"{cooldown:.1f}"
+                cd_surf = self.small_font.render(cd_text, True, COLOR_WHITE)
+                cd_rect = cd_surf.get_rect(center=(x + slot_size // 2, y + slot_size // 2))
+                self.screen.blit(cd_surf, cd_rect)
+            else:
+                # Ready - show key
+                key_surf = self.font.render(key, True, ability_colors[i])
+                key_rect = key_surf.get_rect(center=(x + slot_size // 2, y + slot_size // 2))
+                self.screen.blit(key_surf, key_rect)
+
+            # Ability name below
+            name_surf = self.small_font.render(ability_names[i], True, (150, 150, 150))
+            name_rect = name_surf.get_rect(center=(x + slot_size // 2, y + slot_size + 15))
+            self.screen.blit(name_surf, name_rect)
+
     def _render_fps(self, fps: float):
         """Render FPS counter"""
         if not self.font:

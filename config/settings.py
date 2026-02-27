@@ -57,12 +57,28 @@ XP_LEVEL_SCALING = 1.5               # Multiply XP needed per level
 MAX_LEVEL = 50
 
 # === ABILITIES (4 Slots: Q, W, E, R) ===
-ABILITY_COOLDOWNS = {
-    'Q': 5.0,   # Quick damage ability
-    'W': 8.0,   # Area damage
-    'E': 10.0,  # Utility/defensive
-    'R': 15.0   # Ultimate
-}
+
+# Q - Shadow Dash (Mobility/Defense)
+ABILITY_Q_COOLDOWN = 8.0              # Seconds
+ABILITY_Q_DASH_DISTANCE = 150         # Pixels
+ABILITY_Q_INVULN_TIME = 0.3           # Invulnerability duration
+
+# W - Blood Nova (AoE Damage)
+ABILITY_W_COOLDOWN = 10.0             # Seconds
+ABILITY_W_DAMAGE = 150                # Damage
+ABILITY_W_RADIUS = 100                # Pixels
+ABILITY_W_KNOCKBACK = 200             # Knockback force
+
+# E - Arcane Missiles (Burst Damage)
+ABILITY_E_COOLDOWN = 6.0              # Seconds
+ABILITY_E_DAMAGE = 30                 # Damage per missile
+ABILITY_E_SPEED = 300                 # Missile speed
+ABILITY_E_MISSILES = 3                # Number of missiles
+
+# R - Time Freeze (Ultimate)
+ABILITY_R_COOLDOWN = 30.0             # Seconds
+ABILITY_R_SLOW_PERCENT = 0.7          # 70% slow
+ABILITY_R_DURATION = 3.0              # Seconds
 
 # === PERFORMANCE SETTINGS ===
 MAX_ENTITIES = 500                   # Maximum entities at once

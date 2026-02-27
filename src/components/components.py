@@ -226,6 +226,65 @@ class Tag(Component):
         self.tag = tag
 
 
+# === ABILITY COMPONENTS ===
+
+class HomingProjectile(Component):
+    """Projectile that homes in on target"""
+
+    def __init__(self, target, damage: float, speed: float, lifetime: float):
+        self.target = target  # Target entity
+        self.damage = damage
+        self.speed = speed
+        self.lifetime = lifetime
+        self.time_alive = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Update lifetime, return True if expired"""
+        self.time_alive += dt
+        return self.time_alive >= self.lifetime
+
+
+class Slowed(Component):
+    """Slow effect (reduces movement speed)"""
+
+    def __init__(self, slow_percent: float, duration: float):
+        self.slow_percent = slow_percent  # 0.0 to 1.0 (0.7 = 70% slower)
+        self.duration = duration
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.duration
+
+
+class Invulnerable(Component):
+    """Invulnerability effect (cannot take damage)"""
+
+    def __init__(self, duration: float):
+        self.duration = duration
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.duration
+
+
+class ScreenEffect(Component):
+    """Full-screen visual effect"""
+
+    def __init__(self, effect_type: str, duration: float):
+        self.effect_type = effect_type  # "time_freeze", etc.
+        self.duration = duration
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.duration
+
+
 # === GAME DESIGNER NOTE ===
 # Components are pure data - no logic
 # Logic lives in Systems
