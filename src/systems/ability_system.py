@@ -34,29 +34,42 @@ class AbilityInputSystem(System):
             # Get key presses
             keys = pygame.key.get_pressed()
 
+            # Track ability casts
+            from src.systems.stats_system import GameStats
+            ability_cast = False
+
             # Q - Shadow Dash
             if keys[pygame.K_q] and abilities.can_cast('Q'):
                 self._cast_shadow_dash(entity, pos, vel)
                 abilities.cast('Q', ABILITY_Q_COOLDOWN)
                 self._play_ability_sound()
+                ability_cast = True
 
             # W - Blood Nova
             elif keys[pygame.K_w] and abilities.can_cast('W'):
                 self._cast_blood_nova(entity, pos)
                 abilities.cast('W', ABILITY_W_COOLDOWN)
                 self._play_ability_sound()
+                ability_cast = True
 
             # E - Arcane Missiles
             elif keys[pygame.K_e] and abilities.can_cast('E'):
                 self._cast_arcane_missiles(entity, pos)
                 abilities.cast('E', ABILITY_E_COOLDOWN)
                 self._play_ability_sound()
+                ability_cast = True
 
             # R - Time Freeze
             elif keys[pygame.K_r] and abilities.can_cast('R'):
                 self._cast_time_freeze(entity)
                 abilities.cast('R', ABILITY_R_COOLDOWN)
                 self._play_ability_sound()
+                ability_cast = True
+
+            # Update stats if ability was cast
+            if ability_cast and entity.has_component(GameStats):
+                stats = entity.get_component(GameStats)
+                stats.abilities_cast += 1
 
     def _play_ability_sound(self):
         """Play ability cast sound"""

@@ -23,6 +23,10 @@ from src.systems.particle_system import ParticleSystem
 from src.systems.audio_system import AudioSystem
 from src.systems.powerup_system import PowerUpCollectionSystem
 from src.systems.weapon_system import WeaponFireSystem, LevelUpChoiceSystem
+from src.systems.stats_system import (
+    GameStats, PersistentStats, StatsTrackingSystem,
+    AchievementSystem, calculate_score
+)
 from src.components.character_classes import *
 from src.components.weapons import *
 from config.settings import *
@@ -62,7 +66,10 @@ class DarkSanctum:
         self.medium_font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 24)
 
-        # Stats
+        # Persistent stats
+        self.persistent_stats = PersistentStats()
+
+        # Stats (deprecated - now using GameStats component)
         self.survival_time = 0.0
         self.enemies_killed = 0
         self.current_wave = 0
@@ -75,6 +82,10 @@ class DarkSanctum:
         self.level_up_choices = []
         self.selected_choice_index = 0
 
+        # Game over stats
+        self.final_score = 0
+        self.is_new_high_score = False
+
     def init_game(self):
         """Initialize new game"""
         # Clear world
@@ -85,12 +96,17 @@ class DarkSanctum:
         self._init_systems()
 
         # Spawn player at center with selected class
-        self.factory.create_player(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, self.selected_class)
+        player = self.factory.create_player(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, self.selected_class)
+
+        # Add stats component to player
+        player.add_component(GameStats())
 
         # Reset stats
         self.survival_time = 0.0
         self.enemies_killed = 0
         self.current_wave = 0
+        self.final_score = 0
+        self.is_new_high_score = False
 
         print("\n" + "=" * 70)
         print("🌙 DARK SANCTUM - Game Started 🌙")
@@ -134,6 +150,11 @@ class DarkSanctum:
 
         # Lifetime (priority 65)
         self.world.add_system(LifetimeSystem(self.world))
+
+        # Stats Tracking (priority 65-66)
+        stats_system = StatsTrackingSystem(self.world)
+        self.world.add_system(stats_system)
+        self.world.add_system(AchievementSystem(self.world, self.persistent_stats))
 
         # Particles (priority 66)
         self.world.add_system(ParticleSystem(self.world))
@@ -248,6 +269,42 @@ class DarkSanctum:
 
         player_health = player_entities[0].get_component(Health)
         if not player_health.is_alive:
+            # Calculate final stats and score
+            player = player_entities[0]
+            if player.has_component(GameStats):
+                game_stats = player.get_component(GameStats)
+                player_xp = player.get_component(Experience)
+                player_level = player_xp.level if player_xp else 1
+
+                # Calculate score
+                self.final_score = calculate_score(game_stats, player_level)
+
+                # Check if high score
+                self.is_new_high_score = self.persistent_stats.is_high_score(self.final_score)
+
+                # Save persistent stats
+                self.persistent_stats.update_session_end(game_stats, player_level)
+
+                # Add to high scores if qualifies
+                if self.is_new_high_score:
+                    self.persistent_stats.add_high_score(
+                        self.selected_class.name,
+                        self.final_score,
+                        game_stats.highest_wave,
+                        player_level
+                    )
+
+                print("\n" + "=" * 70)
+                print("💀 GAME OVER 💀")
+                print("=" * 70)
+                print(f"Final Score: {self.final_score}")
+                print(f"Kills: {game_stats.kills}")
+                print(f"Highest Wave: {game_stats.highest_wave}")
+                print(f"Survival Time: {game_stats.get_survival_time_str()}")
+                if self.is_new_high_score:
+                    print("🏆 NEW HIGH SCORE! 🏆")
+                print("=" * 70 + "\n")
+
             self.state = GameState.GAME_OVER
 
     def _render_menu(self):
@@ -395,50 +452,94 @@ class DarkSanctum:
         self.screen.blit(instructions, instructions_rect)
 
     def _render_game_over(self):
-        """Render game over screen"""
+        """Render game over screen with detailed stats and high scores"""
         self.screen.fill(COLOR_BACKGROUND)
 
         # Game Over text
         title = self.title_font.render("DEFEATED", True, COLOR_BLOOD_RED)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 100))
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 60))
         self.screen.blit(title, title_rect)
 
+        # High score indicator
+        if self.is_new_high_score:
+            hs_text = self.large_font.render("🏆 NEW HIGH SCORE! 🏆", True, COLOR_GOLD)
+            hs_rect = hs_text.get_rect(center=(WINDOW_WIDTH // 2, 130))
+            self.screen.blit(hs_text, hs_rect)
+
         # Character info
-        char_text = f"Playing as: {self.selected_class.name}"
+        char_text = f"{self.selected_class.name}"
         char_surf = self.medium_font.render(char_text, True, self.selected_class.color)
-        char_rect = char_surf.get_rect(center=(WINDOW_WIDTH // 2, 170))
+        char_rect = char_surf.get_rect(center=(WINDOW_WIDTH // 2, 180))
         self.screen.blit(char_surf, char_rect)
 
-        # Stats
-        minutes = int(self.survival_time // 60)
-        seconds = int(self.survival_time % 60)
+        # Score
+        score_text = f"SCORE: {self.final_score:,}"
+        score_surf = self.large_font.render(score_text, True, COLOR_GOLD)
+        score_rect = score_surf.get_rect(center=(WINDOW_WIDTH // 2, 230))
+        self.screen.blit(score_surf, score_rect)
 
-        stats = [
-            ("", COLOR_WHITE),  # Empty line
-            (f"⏱️  Survived: {minutes}m {seconds}s", COLOR_WHITE),
-            (f"🌊 Waves Cleared: {self.current_wave}", COLOR_ARCANE_BLUE),
-            ("", COLOR_WHITE),  # Empty line
-        ]
-
-        # Get player level if available
-        player_entities = self.world.get_entities_with_components(Player, Experience)
+        # Get player stats
+        player_entities = self.world.get_entities_with_components(Player, GameStats, Experience)
         if player_entities:
-            xp = player_entities[0].get_component(Experience)
-            stats.append((f"⬆️  Final Level: {xp.level}", COLOR_GOLD))
+            player = player_entities[0]
+            game_stats = player.get_component(GameStats)
+            xp = player.get_component(Experience)
 
-        stats.extend([
-            ("", COLOR_WHITE),
-            ("", COLOR_WHITE),
-            ("Press SPACE to Restart", (150, 150, 150)),
-            ("Press ESC for Menu", (150, 150, 150))
-        ])
+            # Stats columns
+            left_x = WINDOW_WIDTH // 2 - 200
+            right_x = WINDOW_WIDTH // 2 + 200
+            stats_y = 300
 
-        y_offset = 250
-        for line, color in stats:
-            text = self.medium_font.render(line, True, color)
-            text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
-            self.screen.blit(text, text_rect)
-            y_offset += 45
+            # Left column
+            left_stats = [
+                f"⚔️  Kills: {game_stats.kills}",
+                f"💀 Bosses: {game_stats.bosses_killed}",
+                f"🌊 Wave: {game_stats.highest_wave}",
+                f"⬆️  Level: {xp.level}",
+            ]
+
+            for stat in left_stats:
+                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                stat_rect = stat_surf.get_rect(midleft=(left_x, stats_y))
+                self.screen.blit(stat_surf, stat_rect)
+                stats_y += 35
+
+            # Right column
+            stats_y = 300
+            right_stats = [
+                f"⏱️  Time: {game_stats.get_survival_time_str()}",
+                f"✨ Power-ups: {game_stats.power_ups_collected}",
+                f"🎯 Damage: {int(game_stats.damage_dealt)}",
+                f"💥 Abilities: {game_stats.abilities_cast}",
+            ]
+
+            for stat in right_stats:
+                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                stat_rect = stat_surf.get_rect(midleft=(right_x, stats_y))
+                self.screen.blit(stat_surf, stat_rect)
+                stats_y += 35
+
+        # High scores table
+        hs_title = self.medium_font.render("TOP SCORES", True, COLOR_ARCANE_BLUE)
+        hs_title_rect = hs_title.get_rect(center=(WINDOW_WIDTH // 2, 450))
+        self.screen.blit(hs_title, hs_title_rect)
+
+        high_scores = self.persistent_stats.data["high_scores"][:5]  # Top 5
+        hs_y = 490
+        for i, entry in enumerate(high_scores):
+            rank = i + 1
+            score_line = f"{rank}. {entry['character'][:12]:<12} {entry['score']:>6,}  Lv.{entry['level']:<2}  W{entry['wave']:<2}"
+            color = COLOR_GOLD if rank == 1 else COLOR_WHITE
+            score_surf = self.small_font.render(score_line, True, color)
+            score_rect = score_surf.get_rect(center=(WINDOW_WIDTH // 2, hs_y))
+            self.screen.blit(score_surf, score_rect)
+            hs_y += 28
+
+        # Instructions
+        inst_y = WINDOW_HEIGHT - 60
+        inst1 = self.small_font.render("SPACE - Restart  |  ESC - Menu", True, (150, 150, 150))
+        inst1_rect = inst1.get_rect(center=(WINDOW_WIDTH // 2, inst_y))
+        self.screen.blit(inst1, inst1_rect)
 
     def _check_level_up(self):
         """Check if player leveled up and needs weapon choice"""

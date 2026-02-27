@@ -145,6 +145,14 @@ class ProjectileSystem(System):
                 health = entity.get_component(Health)
                 health.damage(projectile.damage)
 
+                # Track damage stats (if player projectile)
+                if projectile.owner_team == "player":
+                    from src.systems.stats_system import GameStats
+                    player_entities = self.get_entities(Player, GameStats)
+                    if player_entities:
+                        stats = player_entities[0].get_component(GameStats)
+                        stats.damage_dealt += projectile.damage
+
                 # Destroy projectile
                 self.world.destroy_entity(projectile_entity)
                 break
@@ -221,8 +229,21 @@ class DamageOnContactSystem(System):
                     # Check invulnerability
                     if not e1.has_component(Invulnerable):
                         health1.damage(damage2.amount)
+                        # Track damage taken if player
+                        if e1.has_component(Player):
+                            from src.systems.stats_system import GameStats
+                            if e1.has_component(GameStats):
+                                stats = e1.get_component(GameStats)
+                                stats.damage_taken += damage2.amount
+
                     if not e2.has_component(Invulnerable):
                         health2.damage(damage1.amount)
+                        # Track damage taken if player
+                        if e2.has_component(Player):
+                            from src.systems.stats_system import GameStats
+                            if e2.has_component(GameStats):
+                                stats = e2.get_component(GameStats)
+                                stats.damage_taken += damage1.amount
 
                     # Set cooldown (0.5s between damage ticks)
                     self.damage_cooldown[key] = 0.5

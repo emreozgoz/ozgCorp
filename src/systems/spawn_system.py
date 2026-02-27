@@ -41,6 +41,12 @@ class WaveSpawnSystem(System):
 
         player_pos = player_entities[0].get_component(Position)
 
+        # Track highest wave in stats
+        from src.systems.stats_system import GameStats
+        if player_entities[0].has_component(GameStats):
+            stats = player_entities[0].get_component(GameStats)
+            stats.highest_wave = max(stats.highest_wave, self.current_wave)
+
         # Check if this is a boss wave
         is_boss_wave = (self.current_wave % BOSS_WAVE_INTERVAL == 0)
 
@@ -253,6 +259,15 @@ class DeathSystem(System):
                 enemy = entity.get_component(Enemy)
                 if enemy:
                     self._award_xp(enemy.xp_value)
+
+                    # Track kill stats
+                    from src.systems.stats_system import GameStats
+                    player_entities = self.get_entities(Player, GameStats)
+                    if player_entities:
+                        stats = player_entities[0].get_component(GameStats)
+                        stats.kills += 1
+                        if enemy.is_boss:
+                            stats.bosses_killed += 1
 
                     # Enemy death sound
                     audio_event = self.world.create_entity()

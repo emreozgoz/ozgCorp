@@ -68,6 +68,13 @@ class PowerUpCollectionSystem(System):
 
             if dist < pickup_radius:
                 self._apply_powerup(player_entity, powerup, player_health, player_xp, player_damage)
+
+                # Track power-up collection
+                from src.systems.stats_system import GameStats
+                if player_entity.has_component(GameStats):
+                    stats = player_entity.get_component(GameStats)
+                    stats.power_ups_collected += 1
+
                 self.world.destroy_entity(powerup_entity)
 
     def _apply_powerup(self, player_entity, powerup: PowerUp, health: Health, xp: Experience, damage: Damage):
