@@ -85,11 +85,18 @@ MAX_ENTITIES = 500                   # Maximum entities at once
 MAX_PROJECTILES = 200                # Maximum projectiles
 CULLING_DISTANCE = 1000              # Don't render beyond this
 
+# === BOSS SETTINGS ===
+BOSS_WAVE_INTERVAL = 5               # Boss every N waves
+BOSS_HEALTH_MULTIPLIER = 10          # 10x normal health
+BOSS_DAMAGE_MULTIPLIER = 2           # 2x damage
+BOSS_SPEED_MULTIPLIER = 0.6          # Slower, more menacing
+BOSS_SIZE_MULTIPLIER = 2.0           # Twice as large
+BOSS_XP_MULTIPLIER = 10              # 10x XP reward
+BOSS_COLOR = (120, 10, 10)           # Dark crimson
+BOSS_GLOW_COLOR = (180, 20, 20)      # Blood red glow
+
 # === GAME BALANCE (Game Designer) ===
 DIFFICULTY_SCALING = 1.1             # Enemy stats multiply per minute
-BOSS_WAVE_INTERVAL = 5               # Boss every N waves
-BOSS_HEALTH_MULTIPLIER = 10
-BOSS_DAMAGE_MULTIPLIER = 2
 
 # === DEBUG ===
 DEBUG_MODE = True

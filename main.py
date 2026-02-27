@@ -19,6 +19,7 @@ from src.systems.ability_system import (
     AbilityInputSystem, HomingMissileSystem,
     StatusEffectSystem, LifetimeSystem
 )
+from src.systems.particle_system import ParticleSystem
 from config.settings import *
 
 
@@ -112,6 +113,9 @@ class DarkSanctum:
 
         # Lifetime (priority 65)
         self.world.add_system(LifetimeSystem(self.world))
+
+        # Particles (priority 66)
+        self.world.add_system(ParticleSystem(self.world))
 
         # Rendering (priority 100)
         self.world.add_system(RenderSystem(self.world, self.screen))

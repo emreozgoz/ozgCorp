@@ -41,14 +41,22 @@ class WaveSpawnSystem(System):
 
         player_pos = player_entities[0].get_component(Position)
 
-        # Spawn enemies
-        for i in range(int(self.enemies_this_wave)):
-            self._spawn_enemy(player_pos)
+        # Check if this is a boss wave
+        is_boss_wave = (self.current_wave % BOSS_WAVE_INTERVAL == 0)
 
-        # Scale difficulty
-        self.enemies_this_wave *= WAVE_SCALING
+        if is_boss_wave:
+            # Spawn boss
+            self._spawn_boss(player_pos)
+            print(f"💀 WAVE {self.current_wave} - BOSS WAVE!")
+        else:
+            # Spawn normal enemies
+            for i in range(int(self.enemies_this_wave)):
+                self._spawn_enemy(player_pos)
 
-        print(f"🌊 WAVE {self.current_wave} - {int(self.enemies_this_wave)} enemies")
+            # Scale difficulty
+            self.enemies_this_wave *= WAVE_SCALING
+
+            print(f"🌊 WAVE {self.current_wave} - {int(self.enemies_this_wave)} enemies")
 
     def _spawn_enemy(self, player_pos: Position):
         """Spawn single enemy off-screen"""
@@ -78,6 +86,39 @@ class WaveSpawnSystem(System):
         enemy.add_component(Enemy(xp_value=ENEMY_XP_VALUE))
         enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED))
         enemy.add_component(Tag("enemy"))
+
+    def _spawn_boss(self, player_pos: Position):
+        """Spawn boss enemy"""
+        # Spawn in front of player
+        angle = random.uniform(0, 2 * math.pi)
+        distance = 400  # Fixed distance
+
+        x = player_pos.x + math.cos(angle) * distance
+        y = player_pos.y + math.sin(angle) * distance
+
+        # Clamp to screen bounds
+        x = max(100, min(WINDOW_WIDTH - 100, x))
+        y = max(100, min(WINDOW_HEIGHT - 100, y))
+
+        # Create boss entity
+        boss = self.world.create_entity()
+        boss_size = ENEMY_SIZE * BOSS_SIZE_MULTIPLIER
+
+        boss.add_component(Position(x, y))
+        boss.add_component(Velocity(0, 0))
+        boss.add_component(Size(boss_size, boss_size))
+        boss.add_component(Sprite(BOSS_COLOR, radius=boss_size / 2))
+        boss.add_component(Health(ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER))
+        boss.add_component(Damage(ENEMY_BASE_DAMAGE * BOSS_DAMAGE_MULTIPLIER))
+        boss.add_component(Team("enemy"))
+        boss.add_component(Enemy(
+            xp_value=ENEMY_XP_VALUE * BOSS_XP_MULTIPLIER,
+            is_boss=True
+        ))
+        boss.add_component(AIChase(speed=ENEMY_BASE_SPEED * BOSS_SPEED_MULTIPLIER))
+        boss.add_component(Tag("boss"))
+
+        print(f"💀 BLOOD TITAN SPAWNED! Health: {ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER}")
 
 
 class AISystem(System):
@@ -135,6 +176,14 @@ class DeathSystem(System):
                 if enemy:
                     self._award_xp(enemy.xp_value)
 
+                # Create death particles
+                pos = entity.get_component(Position)
+                sprite = entity.get_component(Sprite)
+                if pos and sprite:
+                    from src.systems.particle_system import create_death_particles
+                    particle_count = 30 if (enemy and enemy.is_boss) else 15
+                    create_death_particles(self.world, pos.x, pos.y, sprite.color, particle_count)
+
                 # Destroy entity
                 self.world.destroy_entity(entity)
 
@@ -145,6 +194,11 @@ class DeathSystem(System):
         for player in player_entities:
             xp = player.get_component(Experience)
             if xp.add_xp(amount):
+                # Level up particles
+                pos = player.get_component(Position)
+                if pos:
+                    from src.systems.particle_system import create_level_up_particles
+                    create_level_up_particles(self.world, pos.x, pos.y, 40)
                 print(f"⬆️ LEVEL UP! Now level {xp.level}")
 
 

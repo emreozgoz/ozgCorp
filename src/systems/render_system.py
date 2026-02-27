@@ -31,6 +31,9 @@ class RenderSystem(System):
         # Render health bars
         self._render_health_bars()
 
+        # Render boss health bar (top of screen)
+        self._render_boss_health()
+
         # Render HUD
         self._render_hud()
 
@@ -46,7 +49,22 @@ class RenderSystem(System):
             sprite = entity.get_component(Sprite)
             size = entity.get_component(Size)
 
+            # Check if boss (render glow)
+            enemy = entity.get_component(Enemy)
+            is_boss = enemy and enemy.is_boss
+
             if sprite.radius:
+                # Boss glow effect
+                if is_boss:
+                    # Outer glow
+                    pygame.draw.circle(
+                        self.screen,
+                        BOSS_GLOW_COLOR,
+                        (int(pos.x), int(pos.y)),
+                        int(sprite.radius + 5),
+                        3
+                    )
+
                 # Draw as circle
                 pygame.draw.circle(
                     self.screen,
@@ -95,6 +113,60 @@ class RenderSystem(System):
 
             # Border
             pygame.draw.rect(self.screen, (80, 20, 20), bg_rect, 1)
+
+    def _render_boss_health(self):
+        """Render boss health bar at top of screen"""
+        # Find boss
+        boss_entities = self.get_entities(Enemy, Health)
+        boss = None
+        for entity in boss_entities:
+            enemy = entity.get_component(Enemy)
+            if enemy.is_boss:
+                boss = entity
+                break
+
+        if not boss:
+            return
+
+        # Get boss health
+        health = boss.get_component(Health)
+
+        # Boss health bar (top center)
+        bar_width = 400
+        bar_height = 30
+        bar_x = (WINDOW_WIDTH - bar_width) // 2
+        bar_y = 20
+
+        # Background
+        pygame.draw.rect(self.screen, (40, 10, 10),
+                        (bar_x, bar_y, bar_width, bar_height))
+
+        # Foreground
+        fg_width = int(bar_width * health.percent)
+        if fg_width > 0:
+            pygame.draw.rect(self.screen, BOSS_GLOW_COLOR,
+                            (bar_x, bar_y, fg_width, bar_height))
+
+        # Border (thick)
+        pygame.draw.rect(self.screen, COLOR_BLOOD_RED,
+                        (bar_x, bar_y, bar_width, bar_height), 3)
+
+        # Boss name
+        if not self.font:
+            self.font = pygame.font.Font(None, 32)
+
+        boss_text = "💀 BLOOD TITAN 💀"
+        boss_surf = self.font.render(boss_text, True, BOSS_GLOW_COLOR)
+        boss_rect = boss_surf.get_rect(center=(WINDOW_WIDTH // 2, bar_y - 15))
+        self.screen.blit(boss_surf, boss_rect)
+
+        # Health text
+        health_text = f"{int(health.current)}/{int(health.max_health)}"
+        if not self.small_font:
+            self.small_font = pygame.font.Font(None, 24)
+        health_surf = self.small_font.render(health_text, True, COLOR_WHITE)
+        health_rect = health_surf.get_rect(center=(WINDOW_WIDTH // 2, bar_y + bar_height // 2))
+        self.screen.blit(health_surf, health_rect)
 
     def _render_hud(self):
         """Render minimal HUD"""

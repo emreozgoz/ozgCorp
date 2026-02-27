@@ -175,8 +175,9 @@ class Abilities(Component):
 class Enemy(Component):
     """Marks entity as enemy"""
 
-    def __init__(self, xp_value: int):
+    def __init__(self, xp_value: int, is_boss: bool = False):
         self.xp_value = xp_value
+        self.is_boss = is_boss
 
 
 class AIChase(Component):
