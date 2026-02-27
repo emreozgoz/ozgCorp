@@ -118,6 +118,7 @@ class DarkSanctum:
 
         # Combat (priority 30-40)
         self.world.add_system(AutoAttackSystem(self.world))
+        self.world.add_system(WeaponFireSystem(self.world))  # Weapon system
         self.world.add_system(ProjectileSystem(self.world))
         self.world.add_system(HomingMissileSystem(self.world))
         self.world.add_system(DamageOnContactSystem(self.world))
@@ -159,8 +160,11 @@ class DarkSanctum:
             elif self.state == GameState.PLAYING:
                 self._update_game(dt)
                 self._check_game_over()
+                self._check_level_up()
             elif self.state == GameState.PAUSED:
                 self._render_pause()
+            elif self.state == GameState.LEVEL_UP:
+                self._render_level_up()
             elif self.state == GameState.GAME_OVER:
                 self._render_game_over()
 
@@ -201,6 +205,15 @@ class DarkSanctum:
                         self.state = GameState.PLAYING
                     elif event.key == pygame.K_ESCAPE:
                         self.state = GameState.MENU
+
+                # Level-up controls
+                elif self.state == GameState.LEVEL_UP:
+                    if event.key == pygame.K_LEFT:
+                        self.selected_choice_index = (self.selected_choice_index - 1) % len(self.level_up_choices)
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_choice_index = (self.selected_choice_index + 1) % len(self.level_up_choices)
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                        self._apply_weapon_choice()
 
                 # Game over controls
                 if self.state == GameState.GAME_OVER:
@@ -426,6 +439,152 @@ class DarkSanctum:
             text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
             self.screen.blit(text, text_rect)
             y_offset += 45
+
+    def _check_level_up(self):
+        """Check if player leveled up and needs weapon choice"""
+        player_entities = self.world.get_entities_with_components(Player, LevelUpPending, WeaponInventory)
+
+        if player_entities:
+            player = player_entities[0]
+            inventory = player.get_component(WeaponInventory)
+
+            # Generate choices
+            choice_system = LevelUpChoiceSystem(self.world)
+            self.level_up_choices = choice_system.generate_choices(inventory)
+            self.selected_choice_index = 0
+
+            # Pause game for level-up
+            self.state = GameState.LEVEL_UP
+
+            # Remove pending component
+            player.remove_component(LevelUpPending)
+
+    def _apply_weapon_choice(self):
+        """Apply selected weapon upgrade"""
+        if not self.level_up_choices:
+            self.state = GameState.PLAYING
+            return
+
+        choice = self.level_up_choices[self.selected_choice_index]
+        weapon_id = choice['weapon_id']
+
+        # Get player inventory
+        player_entities = self.world.get_entities_with_components(Player, WeaponInventory)
+        if not player_entities:
+            self.state = GameState.PLAYING
+            return
+
+        inventory = player_entities[0].get_component(WeaponInventory)
+
+        # Upgrade weapon
+        inventory.upgrade_weapon(weapon_id)
+
+        weapon_data = choice['weapon_data']
+        new_level = inventory.get_level(weapon_id)
+
+        print(f"🔼 {weapon_data.icon} {weapon_data.name} → Level {new_level}")
+
+        # Resume game
+        self.state = GameState.PLAYING
+        self.level_up_choices = []
+
+    def _render_level_up(self):
+        """Render level-up weapon selection screen"""
+        # Render game in background (paused)
+        self.world.update(0)
+
+        # Dark overlay
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        overlay.set_alpha(200)
+        overlay.fill((10, 5, 15))
+        self.screen.blit(overlay, (0, 0))
+
+        # Title
+        title = self.large_font.render("LEVEL UP!", True, COLOR_GOLD)
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 80))
+        self.screen.blit(title, title_rect)
+
+        # Instructions
+        inst = self.small_font.render("← → to Select | SPACE to Choose", True, COLOR_WHITE)
+        inst_rect = inst.get_rect(center=(WINDOW_WIDTH // 2, 130))
+        self.screen.blit(inst, inst_rect)
+
+        if not self.level_up_choices:
+            return
+
+        # Display weapon choices (3 cards)
+        card_width = 280
+        card_height = 320
+        card_spacing = 40
+        total_width = len(self.level_up_choices) * card_width + (len(self.level_up_choices) - 1) * card_spacing
+        start_x = (WINDOW_WIDTH - total_width) // 2
+        start_y = 200
+
+        for i, choice in enumerate(self.level_up_choices):
+            x = start_x + i * (card_width + card_spacing)
+            is_selected = (i == self.selected_choice_index)
+
+            weapon_data = choice['weapon_data']
+            current_level = choice['current_level']
+            next_level = choice['next_level']
+            is_new = choice['is_new']
+
+            # Card background
+            card_color = weapon_data.color if is_selected else (40, 35, 50)
+            border_color = COLOR_GOLD if is_selected else (80, 75, 90)
+            border_width = 4 if is_selected else 2
+
+            card_rect = pygame.Rect(x, start_y, card_width, card_height)
+            pygame.draw.rect(self.screen, card_color, card_rect)
+            pygame.draw.rect(self.screen, border_color, card_rect, border_width)
+
+            # Weapon icon (large emoji)
+            icon_surf = self.title_font.render(weapon_data.icon, True, COLOR_WHITE)
+            icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
+            self.screen.blit(icon_surf, icon_rect)
+
+            # Weapon name
+            name_surf = self.medium_font.render(weapon_data.name, True, COLOR_WHITE)
+            name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 120))
+            self.screen.blit(name_surf, name_rect)
+
+            # Level indicator
+            if is_new:
+                level_text = "NEW!"
+                level_color = COLOR_GOLD
+            else:
+                level_text = f"Lv {current_level} → {next_level}"
+                level_color = COLOR_ARCANE_BLUE
+
+            level_surf = self.small_font.render(level_text, True, level_color)
+            level_rect = level_surf.get_rect(center=(x + card_width // 2, start_y + 155))
+            self.screen.blit(level_surf, level_rect)
+
+            # Stats
+            level_idx = next_level - 1
+            damage = weapon_data.damage_per_level[level_idx]
+            cooldown = weapon_data.cooldown_per_level[level_idx]
+
+            stats_text = [
+                f"Damage: {int(damage)}",
+                f"Cooldown: {cooldown:.1f}s",
+            ]
+
+            stat_y = start_y + 190
+            for stat in stats_text:
+                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                stat_rect = stat_surf.get_rect(center=(x + card_width // 2, stat_y))
+                self.screen.blit(stat_surf, stat_rect)
+                stat_y += 25
+
+            # Description
+            desc_lines = self._wrap_text(weapon_data.description, 28)
+            desc_y = stat_y + 10
+            for line in desc_lines:
+                desc_surf = self.small_font.render(line, True, (180, 180, 180))
+                desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
+                self.screen.blit(desc_surf, desc_rect)
+                desc_y += 20
 
 
 def main():
