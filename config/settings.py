@@ -95,6 +95,47 @@ BOSS_XP_MULTIPLIER = 10              # 10x XP reward
 BOSS_COLOR = (120, 10, 10)           # Dark crimson
 BOSS_GLOW_COLOR = (180, 20, 20)      # Blood red glow
 
+# === ENEMY TYPES (Game Designer) ===
+# 1. FAST ENEMY (Imp) - Fast, low health, swarms player
+FAST_ENEMY_COLOR = (200, 100, 50)    # Orange
+FAST_ENEMY_SPEED_MULT = 1.5          # 50% faster
+FAST_ENEMY_HEALTH_MULT = 0.6         # 40% less health
+FAST_ENEMY_DAMAGE_MULT = 0.8         # 20% less damage
+FAST_ENEMY_SIZE_MULT = 0.7           # Smaller
+FAST_ENEMY_XP_MULT = 0.8             # Less XP
+
+# 2. TANK ENEMY (Golem) - Slow, high health, blocks path
+TANK_ENEMY_COLOR = (80, 80, 120)     # Grey-blue
+TANK_ENEMY_SPEED_MULT = 0.5          # 50% slower
+TANK_ENEMY_HEALTH_MULT = 3.0         # 3x health
+TANK_ENEMY_DAMAGE_MULT = 1.5         # 50% more damage
+TANK_ENEMY_SIZE_MULT = 1.5           # Larger
+TANK_ENEMY_XP_MULT = 2.0             # Double XP
+
+# 3. RANGED ENEMY (Wraith) - Stays back, shoots projectiles
+RANGED_ENEMY_COLOR = (120, 50, 150)  # Purple
+RANGED_ENEMY_SPEED_MULT = 0.7        # 30% slower
+RANGED_ENEMY_HEALTH_MULT = 0.8       # 20% less health
+RANGED_ENEMY_DAMAGE_MULT = 1.2       # 20% more damage
+RANGED_ENEMY_SIZE_MULT = 0.9         # Slightly smaller
+RANGED_ENEMY_XP_MULT = 1.5           # 50% more XP
+RANGED_ENEMY_ATTACK_RANGE = 300      # Shoot from distance
+RANGED_ENEMY_ATTACK_COOLDOWN = 2.0   # Attack every 2 seconds
+RANGED_ENEMY_KEEP_DISTANCE = 250     # Stay away from player
+
+# === POWER-UPS ===
+POWERUP_DROP_CHANCE = 0.15           # 15% chance to drop on enemy death
+POWERUP_LIFETIME = 10.0              # Seconds before disappearing
+POWERUP_HEALTH_VALUE = 25            # HP restored
+POWERUP_DAMAGE_BOOST_VALUE = 5       # Damage increase
+POWERUP_DAMAGE_BOOST_DURATION = 10.0 # Seconds
+POWERUP_XP_VALUE = 50                # XP gained
+
+# Power-up colors
+POWERUP_HEALTH_COLOR = (50, 255, 100)      # Green
+POWERUP_DAMAGE_COLOR = (255, 150, 50)      # Orange
+POWERUP_XP_COLOR = (255, 215, 0)           # Gold
+
 # === GAME BALANCE (Game Designer) ===
 DIFFICULTY_SCALING = 1.1             # Enemy stats multiply per minute
 

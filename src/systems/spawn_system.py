@@ -49,16 +49,26 @@ class WaveSpawnSystem(System):
             self._spawn_boss(player_pos)
             print(f"💀 WAVE {self.current_wave} - BOSS WAVE!")
         else:
-            # Spawn normal enemies
+            # Spawn varied enemies (60% basic, 20% fast, 15% tank, 5% ranged)
             for i in range(int(self.enemies_this_wave)):
-                self._spawn_enemy(player_pos)
+                roll = random.random()
+                if roll < 0.60:
+                    enemy_type = "basic"
+                elif roll < 0.80:
+                    enemy_type = "fast"
+                elif roll < 0.95:
+                    enemy_type = "tank"
+                else:
+                    enemy_type = "ranged"
+
+                self._spawn_enemy(player_pos, enemy_type)
 
             # Scale difficulty
             self.enemies_this_wave *= WAVE_SCALING
 
             print(f"🌊 WAVE {self.current_wave} - {int(self.enemies_this_wave)} enemies")
 
-    def _spawn_enemy(self, player_pos: Position):
+    def _spawn_enemy(self, player_pos: Position, enemy_type: str = "basic"):
         """Spawn single enemy off-screen"""
         # Random angle
         angle = random.uniform(0, 2 * math.pi)
@@ -74,18 +84,10 @@ class WaveSpawnSystem(System):
         x = max(50, min(WINDOW_WIDTH - 50, x))
         y = max(50, min(WINDOW_HEIGHT - 50, y))
 
-        # Create enemy entity
-        enemy = self.world.create_entity()
-        enemy.add_component(Position(x, y))
-        enemy.add_component(Velocity(0, 0))
-        enemy.add_component(Size(ENEMY_SIZE, ENEMY_SIZE))
-        enemy.add_component(Sprite(ENEMY_COLOR, radius=ENEMY_SIZE / 2))
-        enemy.add_component(Health(ENEMY_BASE_HEALTH))
-        enemy.add_component(Damage(ENEMY_BASE_DAMAGE))
-        enemy.add_component(Team("enemy"))
-        enemy.add_component(Enemy(xp_value=ENEMY_XP_VALUE))
-        enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED))
-        enemy.add_component(Tag("enemy"))
+        # Create enemy using factory
+        from src.entities.factory import EntityFactory
+        factory = EntityFactory(self.world)
+        factory.create_enemy(x, y, enemy_type=enemy_type)
 
     def _spawn_boss(self, player_pos: Position):
         """Spawn boss enemy"""
@@ -118,6 +120,10 @@ class WaveSpawnSystem(System):
         boss.add_component(AIChase(speed=ENEMY_BASE_SPEED * BOSS_SPEED_MULTIPLIER))
         boss.add_component(Tag("boss"))
 
+        # Boss spawn sound
+        audio_event = self.world.create_entity()
+        audio_event.add_component(AudioEvent('boss_spawn'))
+
         print(f"💀 BLOOD TITAN SPAWNED! Health: {ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER}")
 
 
@@ -138,9 +144,15 @@ class AISystem(System):
         player_pos = player_entities[0].get_component(Position)
 
         # Update all chase AI
-        entities = self.get_entities(AIChase, Position, Velocity)
+        chase_entities = self.get_entities(AIChase, Position, Velocity)
 
-        for entity in entities:
+        for entity in chase_entities:
+            # Check if slowed
+            slow_mult = 1.0
+            if entity.has_component(Slowed):
+                slowed = entity.get_component(Slowed)
+                slow_mult = 1.0 - slowed.slow_percent
+
             ai = entity.get_component(AIChase)
             pos = entity.get_component(Position)
             vel = entity.get_component(Velocity)
@@ -151,9 +163,75 @@ class AISystem(System):
             dist = math.sqrt(dx * dx + dy * dy)
 
             if dist > 0:
-                # Normalize and apply speed
-                vel.vx = (dx / dist) * ai.speed
-                vel.vy = (dy / dist) * ai.speed
+                # Normalize and apply speed (with slow)
+                vel.vx = (dx / dist) * ai.speed * slow_mult
+                vel.vy = (dy / dist) * ai.speed * slow_mult
+
+        # Update ranged AI
+        ranged_entities = self.get_entities(AIRanged, Position, Velocity, Team, Damage)
+
+        for entity in ranged_entities:
+            # Check if slowed
+            slow_mult = 1.0
+            if entity.has_component(Slowed):
+                slowed = entity.get_component(Slowed)
+                slow_mult = 1.0 - slowed.slow_percent
+
+            ai = entity.get_component(AIRanged)
+            pos = entity.get_component(Position)
+            vel = entity.get_component(Velocity)
+            team = entity.get_component(Team)
+            damage = entity.get_component(Damage)
+
+            # Calculate distance to player
+            dx = player_pos.x - pos.x
+            dy = player_pos.y - pos.y
+            dist = math.sqrt(dx * dx + dy * dy)
+
+            if dist > 0:
+                # If too close, move away
+                if dist < ai.keep_distance:
+                    # Move away from player
+                    vel.vx = -(dx / dist) * ai.speed * slow_mult
+                    vel.vy = -(dy / dist) * ai.speed * slow_mult
+                # If far enough, stop
+                elif dist > ai.keep_distance + 50:
+                    # Move toward player (but slowly)
+                    vel.vx = (dx / dist) * ai.speed * 0.5 * slow_mult
+                    vel.vy = (dy / dist) * ai.speed * 0.5 * slow_mult
+                else:
+                    # Stay still
+                    vel.vx = 0
+                    vel.vy = 0
+
+                # Attack if in range
+                ai.time_since_attack += dt
+                if dist <= ai.attack_range and ai.time_since_attack >= ai.attack_cooldown:
+                    self._shoot_projectile(pos, player_pos, team.team, damage.amount)
+                    ai.time_since_attack = 0.0
+
+    def _shoot_projectile(self, from_pos: Position, to_pos: Position, team: str, damage: float):
+        """Create enemy projectile"""
+        # Calculate direction
+        dx = to_pos.x - from_pos.x
+        dy = to_pos.y - from_pos.y
+        dist = math.sqrt(dx * dx + dy * dy)
+
+        if dist == 0:
+            return
+
+        dx /= dist
+        dy /= dist
+
+        # Create projectile
+        speed = 200  # Enemy projectile speed
+        projectile = self.world.create_entity()
+        projectile.add_component(Position(from_pos.x, from_pos.y))
+        projectile.add_component(Velocity(dx * speed, dy * speed))
+        projectile.add_component(Size(6, 6))
+        projectile.add_component(Sprite(RANGED_ENEMY_COLOR, radius=3))
+        projectile.add_component(Projectile(team, damage, lifetime=5.0))
+        projectile.add_component(Tag("projectile"))
 
 
 class DeathSystem(System):
@@ -175,6 +253,22 @@ class DeathSystem(System):
                 enemy = entity.get_component(Enemy)
                 if enemy:
                     self._award_xp(enemy.xp_value)
+
+                    # Enemy death sound
+                    audio_event = self.world.create_entity()
+                    audio_event.add_component(AudioEvent('enemy_death'))
+
+                    # Chance to spawn power-up
+                    pos = entity.get_component(Position)
+                    if pos and random.random() < POWERUP_DROP_CHANCE:
+                        from src.systems.powerup_system import spawn_powerup
+                        spawn_powerup(self.world, pos.x, pos.y)
+
+                # Player death sound
+                player = entity.get_component(Player)
+                if player:
+                    audio_event = self.world.create_entity()
+                    audio_event.add_component(AudioEvent('player_hit'))
 
                 # Create death particles
                 pos = entity.get_component(Position)
@@ -199,6 +293,11 @@ class DeathSystem(System):
                 if pos:
                     from src.systems.particle_system import create_level_up_particles
                     create_level_up_particles(self.world, pos.x, pos.y, 40)
+
+                # Level up sound
+                audio_event = self.world.create_entity()
+                audio_event.add_component(AudioEvent('level_up'))
+
                 print(f"⬆️ LEVEL UP! Now level {xp.level}")
 
 

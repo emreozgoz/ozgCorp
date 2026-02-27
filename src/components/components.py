@@ -176,9 +176,10 @@ class Abilities(Component):
 class Enemy(Component):
     """Marks entity as enemy"""
 
-    def __init__(self, xp_value: int, is_boss: bool = False):
+    def __init__(self, xp_value: int, is_boss: bool = False, enemy_type: str = "basic"):
         self.xp_value = xp_value
         self.is_boss = is_boss
+        self.enemy_type = enemy_type  # "basic", "fast", "tank", "ranged"
 
 
 class AIChase(Component):
@@ -187,6 +188,17 @@ class AIChase(Component):
     def __init__(self, speed: float):
         self.speed = speed
         self.target_entity = None  # Will be set to player
+
+
+class AIRanged(Component):
+    """Ranged AI - keep distance and shoot"""
+
+    def __init__(self, speed: float, keep_distance: float, attack_range: float, attack_cooldown: float):
+        self.speed = speed
+        self.keep_distance = keep_distance
+        self.attack_range = attack_range
+        self.attack_cooldown = attack_cooldown
+        self.time_since_attack = 0.0
 
 
 # === PROJECTILE COMPONENTS ===
@@ -285,6 +297,46 @@ class ScreenEffect(Component):
         """Return True if expired"""
         self.elapsed += dt
         return self.elapsed >= self.duration
+
+
+class AudioEvent(Component):
+    """Queued audio event to be played"""
+
+    def __init__(self, event_type: str):
+        self.event_type = event_type  # "player_hit", "enemy_death", etc.
+        self.processed = False
+
+
+class ParticleComponent(Component):
+    """Visual particle effect"""
+
+    def __init__(self, lifetime: float, color: tuple = (255, 255, 255)):
+        self.lifetime = lifetime
+        self.elapsed = 0.0
+        self.color = color
+        self.alpha = 255
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        # Fade out
+        self.alpha = int(255 * (1.0 - self.elapsed / self.lifetime))
+        return self.elapsed >= self.lifetime
+
+
+class PowerUp(Component):
+    """Power-up pickup"""
+
+    def __init__(self, powerup_type: str, value: float, lifetime: float = 10.0):
+        self.powerup_type = powerup_type  # "health", "damage_boost", "xp"
+        self.value = value
+        self.lifetime = lifetime
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.lifetime
 
 
 # === GAME DESIGNER NOTE ===

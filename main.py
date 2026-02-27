@@ -20,6 +20,8 @@ from src.systems.ability_system import (
     StatusEffectSystem, LifetimeSystem
 )
 from src.systems.particle_system import ParticleSystem
+from src.systems.audio_system import AudioSystem
+from src.systems.powerup_system import PowerUpCollectionSystem
 from src.components.character_classes import *
 from config.settings import *
 
@@ -116,6 +118,9 @@ class DarkSanctum:
         # Spawning (priority 50)
         self.world.add_system(WaveSpawnSystem(self.world))
 
+        # Power-ups (priority 55)
+        self.world.add_system(PowerUpCollectionSystem(self.world))
+
         # Death (priority 60)
         self.world.add_system(DeathSystem(self.world))
 
@@ -124,6 +129,9 @@ class DarkSanctum:
 
         # Particles (priority 66)
         self.world.add_system(ParticleSystem(self.world))
+
+        # Audio (priority 70)
+        self.world.add_system(AudioSystem(self.world))
 
         # Rendering (priority 100)
         self.world.add_system(RenderSystem(self.world, self.screen))

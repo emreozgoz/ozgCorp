@@ -38,21 +38,30 @@ class AbilityInputSystem(System):
             if keys[pygame.K_q] and abilities.can_cast('Q'):
                 self._cast_shadow_dash(entity, pos, vel)
                 abilities.cast('Q', ABILITY_Q_COOLDOWN)
+                self._play_ability_sound()
 
             # W - Blood Nova
             elif keys[pygame.K_w] and abilities.can_cast('W'):
                 self._cast_blood_nova(entity, pos)
                 abilities.cast('W', ABILITY_W_COOLDOWN)
+                self._play_ability_sound()
 
             # E - Arcane Missiles
             elif keys[pygame.K_e] and abilities.can_cast('E'):
                 self._cast_arcane_missiles(entity, pos)
                 abilities.cast('E', ABILITY_E_COOLDOWN)
+                self._play_ability_sound()
 
             # R - Time Freeze
             elif keys[pygame.K_r] and abilities.can_cast('R'):
                 self._cast_time_freeze(entity)
                 abilities.cast('R', ABILITY_R_COOLDOWN)
+                self._play_ability_sound()
+
+    def _play_ability_sound(self):
+        """Play ability cast sound"""
+        audio_event = self.world.create_entity()
+        audio_event.add_component(AudioEvent('ability_cast'))
 
     def _cast_shadow_dash(self, player_entity, pos: Position, vel: Velocity):
         """Q - Dash in movement direction with invulnerability"""

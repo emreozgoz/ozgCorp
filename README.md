@@ -34,6 +34,13 @@ Created by **Matrix AI Team** - 18 autonomous AI agents working together in perf
 3. **Void Guardian** - Tank defender (HP: 150, DMG: 7, SPD: 200)
    - Passive: Iron Will - Take 25% less damage
 
+### Enemy Types (4 + Boss)
+1. **Basic Enemy** - Standard threat (60% spawn rate)
+2. **Imp** - Fast swarmer (20% spawn rate) - 1.5x speed, low HP
+3. **Golem** - Tank blocker (15% spawn rate) - 3x HP, slow
+4. **Wraith** - Ranged shooter (5% spawn rate) - Keeps distance, fires projectiles
+5. **Blood Titan** - Boss (every 5 waves) - 10x HP, 2x damage, special glow
+
 ---
 
 ## 🎨 Dark Gothic Aesthetic
@@ -137,7 +144,7 @@ This game was developed by **18 specialized AI agents** working autonomously:
 
 ## 📊 Development Progress
 
-**✅ GAME COMPLETE - 5 SPRINTS DELIVERED**
+**✅ GAME COMPLETE - 6 SPRINTS DELIVERED**
 
 **Sprint 1: Core MVP** ✅
 - ECS Architecture
@@ -177,6 +184,19 @@ This game was developed by **18 specialized AI agents** working autonomously:
 - Survival timer
 - Character info display
 - Complete game loop
+
+**Sprint 6: Enhanced Content** ✅
+- Procedural sound effect system (pygame mixer)
+- 3 New enemy types with unique behaviors:
+  - Fast Enemy (Imp) - Quick, swarming
+  - Tank Enemy (Golem) - Slow, high HP
+  - Ranged Enemy (Wraith) - Kiting, projectiles
+- Power-up drops (15% chance):
+  - Health (green) - Restore 25 HP
+  - Damage Boost (orange) - +5 damage
+  - XP Orb (gold) - Instant 50 XP
+- Varied enemy spawning (60% basic, 20% fast, 15% tank, 5% ranged)
+- Audio feedback for all actions
 
 ---
 

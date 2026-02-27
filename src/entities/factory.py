@@ -53,27 +53,97 @@ class EntityFactory:
         print(f"   Passive: {character_class.passive_name}")
         return player
 
-    def create_enemy(self, x: float, y: float, health_multiplier: float = 1.0) -> Entity:
-        """Create enemy entity with optional health scaling"""
+    def create_enemy(self, x: float, y: float, health_multiplier: float = 1.0, enemy_type: str = "basic") -> Entity:
+        """Create enemy entity with optional health scaling and type"""
         enemy = self.world.create_entity()
 
-        # Core components
+        # Type-specific stats
+        if enemy_type == "fast":
+            return self._create_fast_enemy(x, y, health_multiplier)
+        elif enemy_type == "tank":
+            return self._create_tank_enemy(x, y, health_multiplier)
+        elif enemy_type == "ranged":
+            return self._create_ranged_enemy(x, y, health_multiplier)
+        else:
+            # Basic enemy
+            enemy.add_component(Position(x, y))
+            enemy.add_component(Velocity(0, 0))
+            enemy.add_component(Size(ENEMY_SIZE, ENEMY_SIZE))
+            enemy.add_component(Sprite(ENEMY_COLOR, radius=ENEMY_SIZE / 2))
+
+            # Combat components
+            scaled_health = ENEMY_BASE_HEALTH * health_multiplier
+            enemy.add_component(Health(scaled_health))
+            enemy.add_component(Damage(ENEMY_BASE_DAMAGE))
+            enemy.add_component(Team("enemy"))
+
+            # Enemy-specific
+            enemy.add_component(Enemy(xp_value=ENEMY_XP_VALUE, enemy_type="basic"))
+            enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED))
+
+            # Tags
+            enemy.add_component(Tag("enemy"))
+
+            return enemy
+
+    def _create_fast_enemy(self, x: float, y: float, health_multiplier: float = 1.0) -> Entity:
+        """Create fast enemy (Imp)"""
+        enemy = self.world.create_entity()
+
+        size = ENEMY_SIZE * FAST_ENEMY_SIZE_MULT
+
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
-        enemy.add_component(Size(ENEMY_SIZE, ENEMY_SIZE))
-        enemy.add_component(Sprite(ENEMY_COLOR, radius=ENEMY_SIZE / 2))
-
-        # Combat components
-        scaled_health = ENEMY_BASE_HEALTH * health_multiplier
-        enemy.add_component(Health(scaled_health))
-        enemy.add_component(Damage(ENEMY_BASE_DAMAGE))
+        enemy.add_component(Size(size, size))
+        enemy.add_component(Sprite(FAST_ENEMY_COLOR, radius=size / 2))
+        enemy.add_component(Health(ENEMY_BASE_HEALTH * FAST_ENEMY_HEALTH_MULT * health_multiplier))
+        enemy.add_component(Damage(ENEMY_BASE_DAMAGE * FAST_ENEMY_DAMAGE_MULT))
         enemy.add_component(Team("enemy"))
+        enemy.add_component(Enemy(xp_value=int(ENEMY_XP_VALUE * FAST_ENEMY_XP_MULT), enemy_type="fast"))
+        enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED * FAST_ENEMY_SPEED_MULT))
+        enemy.add_component(Tag("enemy"))
 
-        # Enemy-specific
-        enemy.add_component(Enemy(xp_value=ENEMY_XP_VALUE))
-        enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED))
+        return enemy
 
-        # Tags
+    def _create_tank_enemy(self, x: float, y: float, health_multiplier: float = 1.0) -> Entity:
+        """Create tank enemy (Golem)"""
+        enemy = self.world.create_entity()
+
+        size = ENEMY_SIZE * TANK_ENEMY_SIZE_MULT
+
+        enemy.add_component(Position(x, y))
+        enemy.add_component(Velocity(0, 0))
+        enemy.add_component(Size(size, size))
+        enemy.add_component(Sprite(TANK_ENEMY_COLOR, radius=size / 2))
+        enemy.add_component(Health(ENEMY_BASE_HEALTH * TANK_ENEMY_HEALTH_MULT * health_multiplier))
+        enemy.add_component(Damage(ENEMY_BASE_DAMAGE * TANK_ENEMY_DAMAGE_MULT))
+        enemy.add_component(Team("enemy"))
+        enemy.add_component(Enemy(xp_value=int(ENEMY_XP_VALUE * TANK_ENEMY_XP_MULT), enemy_type="tank"))
+        enemy.add_component(AIChase(speed=ENEMY_BASE_SPEED * TANK_ENEMY_SPEED_MULT))
+        enemy.add_component(Tag("enemy"))
+
+        return enemy
+
+    def _create_ranged_enemy(self, x: float, y: float, health_multiplier: float = 1.0) -> Entity:
+        """Create ranged enemy (Wraith)"""
+        enemy = self.world.create_entity()
+
+        size = ENEMY_SIZE * RANGED_ENEMY_SIZE_MULT
+
+        enemy.add_component(Position(x, y))
+        enemy.add_component(Velocity(0, 0))
+        enemy.add_component(Size(size, size))
+        enemy.add_component(Sprite(RANGED_ENEMY_COLOR, radius=size / 2))
+        enemy.add_component(Health(ENEMY_BASE_HEALTH * RANGED_ENEMY_HEALTH_MULT * health_multiplier))
+        enemy.add_component(Damage(ENEMY_BASE_DAMAGE * RANGED_ENEMY_DAMAGE_MULT))
+        enemy.add_component(Team("enemy"))
+        enemy.add_component(Enemy(xp_value=int(ENEMY_XP_VALUE * RANGED_ENEMY_XP_MULT), enemy_type="ranged"))
+        enemy.add_component(AIRanged(
+            speed=ENEMY_BASE_SPEED * RANGED_ENEMY_SPEED_MULT,
+            keep_distance=RANGED_ENEMY_KEEP_DISTANCE,
+            attack_range=RANGED_ENEMY_ATTACK_RANGE,
+            attack_cooldown=RANGED_ENEMY_ATTACK_COOLDOWN
+        ))
         enemy.add_component(Tag("enemy"))
 
         return enemy
