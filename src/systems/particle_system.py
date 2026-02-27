@@ -117,6 +117,26 @@ def create_level_up_particles(world, x: float, y: float, count: int = 30):
         particle.add_component(Tag("particle"))
 
 
+def create_ability_particles(world, x: float, y: float, color: tuple, count: int = 20, spread: float = 50):
+    """Create particle burst for ability effects"""
+    for i in range(count):
+        angle = random.uniform(0, 2 * math.pi)
+        speed = random.uniform(50, spread * 3)
+
+        particle = world.create_entity()
+        particle.add_component(Position(x, y))
+        particle.add_component(Velocity(
+            math.cos(angle) * speed,
+            math.sin(angle) * speed
+        ))
+        particle.add_component(Size(5, 5))
+        particle.add_component(Sprite(color, radius=2.5))
+        particle.add_component(ParticleComponent(
+            lifetime=random.uniform(0.4, 0.8)
+        ))
+        particle.add_component(Tag("particle"))
+
+
 # === CREATIVE DIRECTOR NOTE ===
 # Particle effects add "game juice":
 # - Visual feedback for hits

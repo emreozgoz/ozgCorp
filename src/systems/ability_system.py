@@ -82,6 +82,9 @@ class AbilityInputSystem(System):
         dx = vel.vx
         dy = vel.vy
 
+        # Store start position for trail
+        start_x, start_y = pos.x, pos.y
+
         # If not moving, dash in last faced direction (or forward)
         if dx == 0 and dy == 0:
             dy = -1  # Default dash upward
@@ -98,6 +101,10 @@ class AbilityInputSystem(System):
 
         # Add invulnerability component (temporary)
         player_entity.add_component(Invulnerable(ABILITY_Q_INVULN_TIME))
+
+        # Create dash trail particles (purple shadow trail)
+        from src.systems.particle_system import create_ability_particles
+        create_ability_particles(self.world, start_x, start_y, (150, 100, 255), 25, spread=30)
 
         # Visual effect (create dash trail)
         self._create_dash_trail(pos.x, pos.y)
@@ -132,8 +139,13 @@ class AbilityInputSystem(System):
 
                 hit_count += 1
 
-        # Visual effect
-        self._create_nova_effect(pos.x, pos.y)
+        # Visual effect (red explosion particles)
+        from src.systems.particle_system import create_ability_particles
+        create_ability_particles(self.world, pos.x, pos.y, (180, 20, 20), 50, spread=100)
+
+        # Screen shake
+        from src.systems.screen_effects import trigger_screen_shake
+        trigger_screen_shake(self.world, 8.0, 0.3)
 
         print(f"💥 Blood Nova! Hit {hit_count} enemies")
 
@@ -160,11 +172,18 @@ class AbilityInputSystem(System):
             self._create_homing_missile(pos.x, pos.y, target_enemy)
             missiles_fired += 1
 
+        # Sparkle effect at cast location
+        from src.systems.particle_system import create_ability_particles
+        create_ability_particles(self.world, pos.x, pos.y, (80, 120, 255), 15, spread=20)
+
         print(f"🔮 Arcane Missiles! Fired {missiles_fired} missiles")
 
     def _cast_time_freeze(self, player_entity):
         """R - Slow all enemies"""
-        enemies = self.get_entities(Enemy)
+        enemies = self.get_entities(Enemy, Position)
+
+        # Get player position for effect
+        player_pos = player_entity.get_component(Position)
 
         for enemy in enemies:
             # Add slow effect
@@ -173,8 +192,17 @@ class AbilityInputSystem(System):
                 duration=ABILITY_R_DURATION
             ))
 
-        # Visual effect
-        self._create_time_freeze_effect()
+            # Blue sparkle on each enemy
+            enemy_pos = enemy.get_component(Position)
+            from src.systems.particle_system import create_ability_particles
+            create_ability_particles(self.world, enemy_pos.x, enemy_pos.y, (200, 200, 255), 8, spread=15)
+
+        # Golden time wave from player
+        create_ability_particles(self.world, player_pos.x, player_pos.y, (255, 215, 0), 40, spread=80)
+
+        # Screen shake
+        from src.systems.screen_effects import trigger_screen_shake
+        trigger_screen_shake(self.world, 5.0, 0.4)
 
         print(f"⏰ Time Freeze! Slowed all enemies")
 

@@ -223,6 +223,11 @@ class DarkSanctum:
                     elif self.state == GameState.PAUSED:
                         self.state = GameState.PLAYING
 
+                # Pause menu controls
+                if self.state == GameState.PAUSED:
+                    if event.key == pygame.K_q:
+                        self.state = GameState.MENU
+
                 # Menu controls
                 if self.state == GameState.MENU:
                     if event.key == pygame.K_LEFT:
@@ -484,22 +489,92 @@ class DarkSanctum:
         return lines
 
     def _render_pause(self):
-        """Render pause overlay"""
+        """Render enhanced pause overlay with stats"""
         # Darken screen
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-        overlay.set_alpha(180)
+        overlay.set_alpha(200)
         overlay.fill((0, 0, 0))
         self.screen.blit(overlay, (0, 0))
 
         # Paused text
-        text = self.large_font.render("PAUSED", True, COLOR_WHITE)
-        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 40))
+        text = self.title_font.render("PAUSED", True, COLOR_GOLD)
+        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 100))
         self.screen.blit(text, text_rect)
 
+        # Get player stats if available
+        player_entities = self.world.get_entities_with_components(Player, Experience, Health)
+        if player_entities:
+            player = player_entities[0]
+            xp = player.get_component(Experience)
+            health = player.get_component(Health)
+
+            # Get stats component if exists
+            from src.systems.stats_system import GameStats
+            if player.has_component(GameStats):
+                game_stats = player.get_component(GameStats)
+
+                # Stats panel
+                panel_width = 600
+                panel_height = 350
+                panel_x = (WINDOW_WIDTH - panel_width) // 2
+                panel_y = 180
+
+                # Panel background
+                panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+                pygame.draw.rect(self.screen, (20, 15, 30), panel_rect)
+                pygame.draw.rect(self.screen, COLOR_ARCANE_BLUE, panel_rect, 3)
+
+                # Character info
+                char_name = player.get_component(Player).character_class
+                char_text = self.large_font.render(f"⚔️  {char_name}", True, COLOR_WHITE)
+                char_rect = char_text.get_rect(center=(WINDOW_WIDTH // 2, panel_y + 40))
+                self.screen.blit(char_text, char_rect)
+
+                # Player stats (2 columns)
+                left_x = panel_x + 80
+                right_x = panel_x + panel_width // 2 + 80
+                stats_y = panel_y + 90
+
+                left_stats = [
+                    f"Level: {xp.level}",
+                    f"HP: {int(health.current)}/{int(health.max_health)}",
+                    f"Wave: {game_stats.highest_wave}",
+                    f"Kills: {game_stats.kills}",
+                    f"Bosses: {game_stats.bosses_killed}"
+                ]
+
+                for stat in left_stats:
+                    stat_surf = self.medium_font.render(stat, True, COLOR_WHITE)
+                    stat_rect = stat_surf.get_rect(midleft=(left_x, stats_y))
+                    self.screen.blit(stat_surf, stat_rect)
+                    stats_y += 40
+
+                stats_y = panel_y + 90
+                right_stats = [
+                    f"Time: {game_stats.get_survival_time_str()}",
+                    f"Damage: {int(game_stats.damage_dealt)}",
+                    f"Power-ups: {game_stats.power_ups_collected}",
+                    f"Abilities: {game_stats.abilities_cast}",
+                    f"Dmg Taken: {int(game_stats.damage_taken)}"
+                ]
+
+                for stat in right_stats:
+                    stat_surf = self.medium_font.render(stat, True, COLOR_WHITE)
+                    stat_rect = stat_surf.get_rect(midleft=(right_x, stats_y))
+                    self.screen.blit(stat_surf, stat_rect)
+                    stats_y += 40
+
         # Instructions
-        instructions = self.small_font.render("Press ESC to Resume", True, COLOR_WHITE)
-        instructions_rect = instructions.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20))
-        self.screen.blit(instructions, instructions_rect)
+        inst_y = WINDOW_HEIGHT - 120
+        instructions = [
+            "ESC - Resume Game",
+            "Q - Quit to Menu"
+        ]
+
+        for i, inst in enumerate(instructions):
+            inst_surf = self.small_font.render(inst, True, (180, 180, 180))
+            inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, inst_y + i * 30))
+            self.screen.blit(inst_surf, inst_rect)
 
     def _render_game_over(self):
         """Render game over screen with detailed stats and high scores"""
