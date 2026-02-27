@@ -10,6 +10,7 @@ import random
 from src.core.ecs import System
 from src.components.components import *
 from config.settings import *
+from config.difficulty import DifficultySettings
 
 
 class WaveSpawnSystem(System):
@@ -26,7 +27,11 @@ class WaveSpawnSystem(System):
         """Update spawn timer"""
         self.time_since_wave += dt
 
-        if self.time_since_wave >= WAVE_SPAWN_INTERVAL:
+        # Get difficulty spawn interval
+        multipliers = DifficultySettings.get_multipliers()
+        spawn_interval = multipliers['spawn_interval']
+
+        if self.time_since_wave >= spawn_interval:
             self._spawn_wave()
             self.time_since_wave = 0.0
 
@@ -69,8 +74,9 @@ class WaveSpawnSystem(System):
 
                 self._spawn_enemy(player_pos, enemy_type)
 
-            # Scale difficulty
-            self.enemies_this_wave *= WAVE_SCALING
+            # Scale difficulty (use difficulty multiplier)
+            multipliers = DifficultySettings.get_multipliers()
+            self.enemies_this_wave *= multipliers['wave_scaling']
 
             print(f"🌊 WAVE {self.current_wave} - {int(self.enemies_this_wave)} enemies")
 
@@ -129,6 +135,10 @@ class WaveSpawnSystem(System):
         # Boss spawn sound
         audio_event = self.world.create_entity()
         audio_event.add_component(AudioEvent('boss_spawn'))
+
+        # Boss spawn screen shake
+        from src.systems.screen_effects import trigger_screen_shake
+        trigger_screen_shake(self.world, 15.0, 0.5)
 
         print(f"💀 BLOOD TITAN SPAWNED! Health: {ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER}")
 
@@ -273,9 +283,10 @@ class DeathSystem(System):
                     audio_event = self.world.create_entity()
                     audio_event.add_component(AudioEvent('enemy_death'))
 
-                    # Chance to spawn power-up
+                    # Chance to spawn power-up (use difficulty multiplier)
                     pos = entity.get_component(Position)
-                    if pos and random.random() < POWERUP_DROP_CHANCE:
+                    multipliers = DifficultySettings.get_multipliers()
+                    if pos and random.random() < multipliers['powerup_drop_chance']:
                         from src.systems.powerup_system import spawn_powerup
                         spawn_powerup(self.world, pos.x, pos.y)
 
@@ -292,6 +303,11 @@ class DeathSystem(System):
                     from src.systems.particle_system import create_death_particles
                     particle_count = 30 if (enemy and enemy.is_boss) else 15
                     create_death_particles(self.world, pos.x, pos.y, sprite.color, particle_count)
+
+                    # Boss death screen shake
+                    if enemy and enemy.is_boss:
+                        from src.systems.screen_effects import trigger_screen_shake
+                        trigger_screen_shake(self.world, 20.0, 0.8)
 
                 # Destroy entity
                 self.world.destroy_entity(entity)

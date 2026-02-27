@@ -105,7 +105,12 @@ class Experience(Component):
 
     def add_xp(self, amount: int) -> bool:
         """Add XP, return True if leveled up"""
-        self.current_xp += amount
+        # Apply difficulty multiplier
+        from config.difficulty import DifficultySettings
+        multipliers = DifficultySettings.get_multipliers()
+        actual_xp = amount * multipliers['xp_gain']
+
+        self.current_xp += actual_xp
         if self.current_xp >= self.xp_to_next_level:
             return self._level_up()
         return False

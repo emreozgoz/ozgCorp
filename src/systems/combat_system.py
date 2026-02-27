@@ -145,6 +145,11 @@ class ProjectileSystem(System):
                 health = entity.get_component(Health)
                 health.damage(projectile.damage)
 
+                # Create damage number
+                from src.systems.screen_effects import create_damage_number
+                entity_pos = entity.get_component(Position)
+                create_damage_number(self.world, entity_pos.x, entity_pos.y, projectile.damage)
+
                 # Track damage stats (if player projectile)
                 if projectile.owner_team == "player":
                     from src.systems.stats_system import GameStats

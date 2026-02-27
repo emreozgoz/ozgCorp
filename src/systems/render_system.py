@@ -22,25 +22,39 @@ class RenderSystem(System):
 
     def update(self, dt: float):
         """Render frame"""
+        # Get screen shake offset
+        camera_offset = self._get_camera_offset()
+
         # Clear screen with dark background
         self.screen.fill(COLOR_BACKGROUND)
 
-        # Render all sprites
-        self._render_sprites()
+        # Render all sprites (with camera offset)
+        self._render_sprites(camera_offset)
 
         # Render health bars
-        self._render_health_bars()
+        self._render_health_bars(camera_offset)
 
         # Render boss health bar (top of screen)
         self._render_boss_health()
 
-        # Render HUD
+        # Render damage numbers
+        self._render_damage_numbers(camera_offset)
+
+        # Render HUD (not affected by camera shake)
         self._render_hud()
 
         if SHOW_FPS:
             self._render_fps(1.0 / dt if dt > 0 else 0)
 
-    def _render_sprites(self):
+    def _get_camera_offset(self) -> tuple[float, float]:
+        """Get camera offset from screen shake system"""
+        from src.systems.screen_effects import ScreenEffectsSystem
+        for system in self.world.systems:
+            if isinstance(system, ScreenEffectsSystem):
+                return system.get_camera_offset()
+        return (0, 0)
+
+    def _render_sprites(self, camera_offset: tuple[float, float] = (0, 0)):
         """Render all entities with sprites"""
         entities = self.get_entities(Position, Sprite, Size)
 
@@ -48,6 +62,15 @@ class RenderSystem(System):
             pos = entity.get_component(Position)
             sprite = entity.get_component(Sprite)
             size = entity.get_component(Size)
+
+            # Apply camera offset for screen shake
+            render_x = int(pos.x + camera_offset[0])
+            render_y = int(pos.y + camera_offset[1])
+
+            # Check for hit flash
+            from src.systems.screen_effects import HitFlash
+            hit_flash = entity.get_component(HitFlash) if entity.has_component(HitFlash) else None
+            flash_color = (255, 255, 255) if (hit_flash and hit_flash.active) else sprite.color
 
             # Check if boss (render glow)
             enemy = entity.get_component(Enemy)
@@ -60,29 +83,29 @@ class RenderSystem(System):
                     pygame.draw.circle(
                         self.screen,
                         BOSS_GLOW_COLOR,
-                        (int(pos.x), int(pos.y)),
+                        (render_x, render_y),
                         int(sprite.radius + 5),
                         3
                     )
 
-                # Draw as circle
+                # Draw as circle (with hit flash)
                 pygame.draw.circle(
                     self.screen,
-                    sprite.color,
-                    (int(pos.x), int(pos.y)),
+                    flash_color,
+                    (render_x, render_y),
                     int(sprite.radius)
                 )
             else:
                 # Draw as rectangle
                 rect = pygame.Rect(
-                    int(pos.x - size.width / 2),
-                    int(pos.y - size.height / 2),
+                    int(render_x - size.width / 2),
+                    int(render_y - size.height / 2),
                     int(size.width),
                     int(size.height)
                 )
                 pygame.draw.rect(self.screen, sprite.color, rect)
 
-    def _render_health_bars(self):
+    def _render_health_bars(self, camera_offset: tuple[float, float] = (0, 0)):
         """Render health bars above entities"""
         entities = self.get_entities(Position, Health, Size)
 
@@ -95,11 +118,15 @@ class RenderSystem(System):
             if health.percent >= 0.99:
                 continue
 
-            # Health bar position (above entity)
+            # Apply camera offset
+            render_x = pos.x + camera_offset[0]
+            render_y = pos.y + camera_offset[1]
+
+            # Health bar position (above entity, with camera offset)
             bar_width = size.width
             bar_height = 4
-            bar_x = int(pos.x - bar_width / 2)
-            bar_y = int(pos.y - size.height / 2 - 10)
+            bar_x = int(render_x - bar_width / 2)
+            bar_y = int(render_y - size.height / 2 - 10)
 
             # Background (dark red)
             bg_rect = pygame.Rect(bar_x, bar_y, bar_width, bar_height)
@@ -306,6 +333,46 @@ class RenderSystem(System):
             name_surf = self.small_font.render(ability_names[i], True, (150, 150, 150))
             name_rect = name_surf.get_rect(center=(x + slot_size // 2, y + slot_size + 15))
             self.screen.blit(name_surf, name_rect)
+
+    def _render_damage_numbers(self, camera_offset: tuple[float, float] = (0, 0)):
+        """Render floating damage numbers"""
+        from src.systems.screen_effects import DamageNumber
+        damage_entities = self.get_entities(DamageNumber, Position)
+
+        if not self.font:
+            self.font = pygame.font.Font(None, 24)
+
+        for entity in damage_entities:
+            damage_num = entity.get_component(DamageNumber)
+            pos = entity.get_component(Position)
+
+            # Apply camera offset
+            render_x = int(pos.x + camera_offset[0])
+            render_y = int(pos.y + camera_offset[1])
+
+            # Fade out over time
+            alpha = int(255 * (1.0 - damage_num.elapsed / damage_num.lifetime))
+            alpha = max(0, min(255, alpha))
+
+            # Color based on damage type
+            if damage_num.is_critical:
+                color = (255, 215, 0)  # Gold for critical
+                font_size = 32
+            else:
+                color = (255, 100, 100)  # Red for normal
+                font_size = 24
+
+            # Create font and render text
+            damage_font = pygame.font.Font(None, font_size)
+            damage_text = str(int(damage_num.damage))
+            damage_surf = damage_font.render(damage_text, True, color)
+
+            # Apply alpha
+            damage_surf.set_alpha(alpha)
+
+            # Center text on position
+            text_rect = damage_surf.get_rect(center=(render_x, render_y))
+            self.screen.blit(damage_surf, text_rect)
 
     def _render_fps(self, fps: float):
         """Render FPS counter"""

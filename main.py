@@ -27,9 +27,13 @@ from src.systems.stats_system import (
     GameStats, PersistentStats, StatsTrackingSystem,
     AchievementSystem, calculate_score
 )
+from src.systems.screen_effects import (
+    ScreenEffectsSystem, HitFlashSystem, DamageNumberSystem
+)
 from src.components.character_classes import *
 from src.components.weapons import *
 from config.settings import *
+from config.difficulty import Difficulty, DifficultySettings
 
 
 class GameState:
@@ -78,6 +82,10 @@ class DarkSanctum:
         self.selected_class_index = 0
         self.selected_class = ALL_CLASSES[0]
 
+        # Difficulty selection
+        self.selected_difficulty_index = 1  # Start on NORMAL
+        self.difficulties = [Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD]
+
         # Level-up choices
         self.level_up_choices = []
         self.selected_choice_index = 0
@@ -119,6 +127,9 @@ class DarkSanctum:
 
     def _init_systems(self):
         """Initialize all game systems"""
+        # Screen Effects (priority 5)
+        self.world.add_system(ScreenEffectsSystem(self.world))
+
         # Input (priority 5-6)
         self.world.add_system(PlayerInputSystem(self.world))
         self.world.add_system(AbilityInputSystem(self.world))
@@ -138,6 +149,10 @@ class DarkSanctum:
         self.world.add_system(ProjectileSystem(self.world))
         self.world.add_system(HomingMissileSystem(self.world))
         self.world.add_system(DamageOnContactSystem(self.world))
+
+        # Screen Effects (priority 41-42)
+        self.world.add_system(HitFlashSystem(self.world))
+        self.world.add_system(DamageNumberSystem(self.world))
 
         # Spawning (priority 50)
         self.world.add_system(WaveSpawnSystem(self.world))
@@ -210,7 +225,13 @@ class DarkSanctum:
 
                 # Menu controls
                 if self.state == GameState.MENU:
-                    if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                    if event.key == pygame.K_LEFT:
+                        self.selected_difficulty_index = (self.selected_difficulty_index - 1) % len(self.difficulties)
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_difficulty_index = (self.selected_difficulty_index + 1) % len(self.difficulties)
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                        # Set difficulty
+                        DifficultySettings.set_difficulty(self.difficulties[self.selected_difficulty_index])
                         self.state = GameState.CLASS_SELECT
 
                 # Class selection controls
@@ -321,17 +342,46 @@ class DarkSanctum:
         subtitle_rect = subtitle.get_rect(center=(WINDOW_WIDTH // 2, 230))
         self.screen.blit(subtitle, subtitle_rect)
 
+        # Difficulty selection
+        diff_title = self.medium_font.render("SELECT DIFFICULTY", True, COLOR_GOLD)
+        diff_title_rect = diff_title.get_rect(center=(WINDOW_WIDTH // 2, 320))
+        self.screen.blit(diff_title, diff_title_rect)
+
+        # Difficulty boxes
+        diff_names = ["EASY", "NORMAL", "HARD"]
+        diff_colors = [(100, 200, 100), (200, 200, 100), (200, 100, 100)]
+        box_width = 150
+        box_spacing = 30
+        total_width = len(diff_names) * box_width + (len(diff_names) - 1) * box_spacing
+        start_x = (WINDOW_WIDTH - total_width) // 2
+        y = 380
+
+        for i, name in enumerate(diff_names):
+            x = start_x + i * (box_width + box_spacing)
+            is_selected = (i == self.selected_difficulty_index)
+
+            # Box
+            box_rect = pygame.Rect(x, y, box_width, 60)
+            border_color = COLOR_GOLD if is_selected else (80, 80, 90)
+            border_width = 4 if is_selected else 2
+
+            pygame.draw.rect(self.screen, (40, 40, 50), box_rect)
+            pygame.draw.rect(self.screen, border_color, box_rect, border_width)
+
+            # Difficulty name
+            text_color = diff_colors[i] if is_selected else (120, 120, 120)
+            text = self.medium_font.render(name, True, text_color)
+            text_rect = text.get_rect(center=(x + box_width // 2, y + 30))
+            self.screen.blit(text, text_rect)
+
         # Instructions
         instructions = [
-            "WASD / Arrow Keys - Move",
-            "Auto-attack targets nearest enemy",
-            "Survive waves of enemies",
-            "Level up to gain power",
             "",
-            "Press SPACE to Start"
+            "← → to select difficulty",
+            "Press SPACE to Continue"
         ]
 
-        y_offset = 320
+        y_offset = 480
         for line in instructions:
             text = self.small_font.render(line, True, COLOR_WHITE)
             text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
