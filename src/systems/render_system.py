@@ -226,6 +226,10 @@ class RenderSystem(System):
         level_surf = self.font.render(level_text, True, COLOR_GOLD)
         self.screen.blit(level_surf, (20, 20))
 
+        # === WAVE & TIME (Top Center) ===
+        # Get wave count from game
+        # Note: This will be passed from main game loop
+
         # === ENEMY COUNT (Top Right) ===
         enemy_count = len(self.get_entities(Enemy))
         enemy_text = f"ENEMIES: {enemy_count}"

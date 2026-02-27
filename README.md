@@ -17,12 +17,22 @@ Created by **Matrix AI Team** - 18 autonomous AI agents working together in perf
 - **XP & Leveling** - Gain experience from kills, level up to become stronger
 - **Tactical Positioning** - Enemy AI chases you, positioning matters
 
-### Coming Soon
-- **4 Active Abilities** (Q, W, E, R) - Manual skill-based combat
-- **8 Character Classes** - Unique playstyles and abilities
-- **Epic Boss Fights** - Major bosses every 5 minutes
-- **Ability Synergies** - Combine abilities for devastating combos
-- **Meta-Progression** - Persistent upgrades between runs
+### Combat System
+- **4 Active Abilities** (Q, W, E, R) - Manual skill-based tactical combat
+  - **Q - Shadow Dash**: Teleport with invulnerability
+  - **W - Blood Nova**: AoE damage explosion
+  - **E - Arcane Missiles**: 3 homing projectiles
+  - **R - Time Freeze**: Slow all enemies (Ultimate)
+- **Boss Fights** - Epic Blood Titan every 5 waves (10x health, 2x damage)
+- **Particle Effects** - Satisfying visual feedback on hits and deaths
+
+### Character Classes (3 Unique)
+1. **Shadow Knight** - Balanced warrior (HP: 100, DMG: 10, SPD: 250)
+   - Passive: Shadow Step - Dash cooldown -25%
+2. **Blood Mage** - Glass cannon caster (HP: 70, DMG: 15, SPD: 220)
+   - Passive: Blood Magic - Abilities +50% damage
+3. **Void Guardian** - Tank defender (HP: 150, DMG: 7, SPD: 200)
+   - Passive: Iron Will - Take 25% less damage
 
 ---
 
@@ -127,22 +137,46 @@ This game was developed by **18 specialized AI agents** working autonomously:
 
 ## 📊 Development Progress
 
-**Sprint 1: Core MVP** ✅ COMPLETE
-- [x] ECS Architecture
-- [x] Player Movement (WASD)
-- [x] Auto-Attack System
-- [x] Wave-Based Enemy Spawning
-- [x] Health & Damage System
-- [x] XP & Leveling
-- [x] Gothic UI/HUD
-- [x] Game States (Menu, Playing, Pause, Game Over)
+**✅ GAME COMPLETE - 5 SPRINTS DELIVERED**
 
-**Next Sprints:**
-- Sprint 2: Ability System (Q/W/E/R)
-- Sprint 3: Character Classes
-- Sprint 4: Boss Fights
-- Sprint 5: Power-ups & Pickups
-- Sprint 6: Particle Effects & Polish
+**Sprint 1: Core MVP** ✅
+- ECS Architecture
+- Player Movement (WASD)
+- Auto-Attack System
+- Wave-Based Enemy Spawning
+- Health & Damage System
+- XP & Leveling
+- Gothic UI/HUD
+- Game States (Menu, Playing, Pause, Game Over)
+
+**Sprint 2: Ability System** ✅
+- 4 Active Abilities (Q/W/E/R)
+- Shadow Dash (mobility + invulnerability)
+- Blood Nova (AoE damage)
+- Arcane Missiles (homing projectiles)
+- Time Freeze (mass slow)
+- Ability UI with cooldown tracking
+
+**Sprint 3: Boss & Polish** ✅
+- Blood Titan boss (every 5 waves)
+- Boss health bar system
+- Particle effects (death, level up)
+- Visual polish (glow effects)
+- Boss glow indicators
+
+**Sprint 4: Character Classes** ✅
+- 3 Unique Classes
+- Character Selection Screen
+- Class-specific stats
+- Unique passive abilities
+- Replayability through variety
+
+**Sprint 5: Final Polish** ✅
+- Enhanced game over stats
+- Wave counter tracking
+- Survival timer
+- Character info display
+- Complete game loop
 
 ---
 

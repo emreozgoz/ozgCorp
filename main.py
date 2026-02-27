@@ -60,6 +60,7 @@ class DarkSanctum:
         # Stats
         self.survival_time = 0.0
         self.enemies_killed = 0
+        self.current_wave = 0
 
         # Character selection
         self.selected_class_index = 0
@@ -80,6 +81,7 @@ class DarkSanctum:
         # Reset stats
         self.survival_time = 0.0
         self.enemies_killed = 0
+        self.current_wave = 0
 
         print("\n" + "=" * 70)
         print("🌙 DARK SANCTUM - Game Started 🌙")
@@ -197,6 +199,13 @@ class DarkSanctum:
         """Update game logic"""
         # Update survival time
         self.survival_time += dt
+
+        # Get current wave from spawn system
+        from src.systems.spawn_system import WaveSpawnSystem
+        for system in self.world.systems:
+            if isinstance(system, WaveSpawnSystem):
+                self.current_wave = system.current_wave
+                break
 
         # Update ECS world
         self.world.update(dt)
@@ -363,27 +372,45 @@ class DarkSanctum:
 
         # Game Over text
         title = self.title_font.render("DEFEATED", True, COLOR_BLOOD_RED)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 150))
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 100))
         self.screen.blit(title, title_rect)
+
+        # Character info
+        char_text = f"Playing as: {self.selected_class.name}"
+        char_surf = self.medium_font.render(char_text, True, self.selected_class.color)
+        char_rect = char_surf.get_rect(center=(WINDOW_WIDTH // 2, 170))
+        self.screen.blit(char_surf, char_rect)
 
         # Stats
         minutes = int(self.survival_time // 60)
         seconds = int(self.survival_time % 60)
-        time_text = f"Survived: {minutes}m {seconds}s"
 
         stats = [
-            time_text,
-            "",
-            "Press SPACE to Restart",
-            "Press ESC for Menu"
+            ("", COLOR_WHITE),  # Empty line
+            (f"⏱️  Survived: {minutes}m {seconds}s", COLOR_WHITE),
+            (f"🌊 Waves Cleared: {self.current_wave}", COLOR_ARCANE_BLUE),
+            ("", COLOR_WHITE),  # Empty line
         ]
 
-        y_offset = 280
-        for line in stats:
-            text = self.medium_font.render(line, True, COLOR_WHITE)
+        # Get player level if available
+        player_entities = self.world.get_entities_with_components(Player, Experience)
+        if player_entities:
+            xp = player_entities[0].get_component(Experience)
+            stats.append((f"⬆️  Final Level: {xp.level}", COLOR_GOLD))
+
+        stats.extend([
+            ("", COLOR_WHITE),
+            ("", COLOR_WHITE),
+            ("Press SPACE to Restart", (150, 150, 150)),
+            ("Press ESC for Menu", (150, 150, 150))
+        ])
+
+        y_offset = 250
+        for line, color in stats:
+            text = self.medium_font.render(line, True, color)
             text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
             self.screen.blit(text, text_rect)
-            y_offset += 50
+            y_offset += 45
 
 
 def main():
