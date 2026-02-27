@@ -19,6 +19,10 @@ class RenderSystem(System):
         self.priority = 100  # Render last
         self.screen = screen
         self.font = None
+        # Initialize fonts
+        self.small_font = pygame.font.Font(None, 20)
+        self.medium_font = pygame.font.Font(None, 32)
+        self.large_font = pygame.font.Font(None, 48)
 
     def update(self, dt: float):
         """Render frame"""

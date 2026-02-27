@@ -1,0 +1,20 @@
+{
+  "total_games_played": 0,
+  "total_kills": 0,
+  "total_damage_dealt": 0,
+  "total_damage_taken": 0,
+  "total_power_ups": 0,
+  "total_abilities_cast": 0,
+  "total_bosses_killed": 0,
+  "total_playtime_seconds": 0,
+  "highest_level": 1,
+  "highest_wave": 0,
+  "longest_survival_time": 0.0,
+  "high_scores": [],
+  "achievements_unlocked": [
+    "first_blood",
+    "boss_slayer"
+  ],
+  "first_played": null,
+  "last_played": null
+}
