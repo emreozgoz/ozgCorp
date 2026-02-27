@@ -7,6 +7,7 @@ Clean entity creation helpers
 
 from src.core.ecs import Entity, World
 from src.components.components import *
+from src.components.character_classes import *
 from config.settings import *
 
 
@@ -16,23 +17,25 @@ class EntityFactory:
     def __init__(self, world: World):
         self.world = world
 
-    def create_player(self, x: float, y: float) -> Entity:
-        """Create player entity"""
+    def create_player(self, x: float, y: float, character_class: CharacterClass = SHADOW_KNIGHT) -> Entity:
+        """Create player entity with chosen class"""
         player = self.world.create_entity()
 
-        # Core components
+        # Core components (use class stats)
         player.add_component(Position(x, y))
         player.add_component(Velocity(0, 0))
         player.add_component(Size(PLAYER_SIZE, PLAYER_SIZE))
-        player.add_component(Sprite(PLAYER_COLOR, radius=PLAYER_SIZE / 2))
+        player.add_component(Sprite(character_class.color, radius=PLAYER_SIZE / 2))
 
-        # Combat components
-        player.add_component(Health(PLAYER_MAX_HEALTH))
-        player.add_component(Damage(PLAYER_BASE_DAMAGE))
+        # Combat components (use class stats)
+        player.add_component(Health(character_class.health))
+        player.add_component(Damage(character_class.damage))
         player.add_component(Team("player"))
 
         # Player-specific
-        player.add_component(Player())
+        player_comp = Player(character_class.name)
+        player_comp.move_speed = character_class.speed  # Apply class speed
+        player.add_component(player_comp)
         player.add_component(Experience())
         player.add_component(AutoAttack(
             damage=AUTO_ATTACK_DAMAGE,
@@ -45,7 +48,9 @@ class EntityFactory:
         # Tags
         player.add_component(Tag("player"))
 
-        print(f"🎮 Player spawned at ({x}, {y})")
+        print(f"🎮 {character_class.name} spawned at ({x}, {y})")
+        print(f"   HP: {character_class.health} | DMG: {character_class.damage} | SPD: {character_class.speed}")
+        print(f"   Passive: {character_class.passive_name}")
         return player
 
     def create_enemy(self, x: float, y: float, health_multiplier: float = 1.0) -> Entity:

@@ -90,7 +90,8 @@ class Team(Component):
 class Player(Component):
     """Marks entity as player"""
 
-    def __init__(self):
+    def __init__(self, character_class_name: str = "Shadow Knight"):
+        self.character_class_name = character_class_name
         self.move_speed = 250.0
 
 

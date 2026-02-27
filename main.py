@@ -20,12 +20,14 @@ from src.systems.ability_system import (
     StatusEffectSystem, LifetimeSystem
 )
 from src.systems.particle_system import ParticleSystem
+from src.components.character_classes import *
 from config.settings import *
 
 
 class GameState:
     """Game state management"""
     MENU = "menu"
+    CLASS_SELECT = "class_select"
     PLAYING = "playing"
     PAUSED = "paused"
     GAME_OVER = "game_over"
@@ -59,6 +61,10 @@ class DarkSanctum:
         self.survival_time = 0.0
         self.enemies_killed = 0
 
+        # Character selection
+        self.selected_class_index = 0
+        self.selected_class = ALL_CLASSES[0]
+
     def init_game(self):
         """Initialize new game"""
         # Clear world
@@ -68,8 +74,8 @@ class DarkSanctum:
         # Create systems
         self._init_systems()
 
-        # Spawn player at center
-        self.factory.create_player(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+        # Spawn player at center with selected class
+        self.factory.create_player(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, self.selected_class)
 
         # Reset stats
         self.survival_time = 0.0
@@ -131,6 +137,8 @@ class DarkSanctum:
             # Update based on state
             if self.state == GameState.MENU:
                 self._render_menu()
+            elif self.state == GameState.CLASS_SELECT:
+                self._render_class_select()
             elif self.state == GameState.PLAYING:
                 self._update_game(dt)
                 self._check_game_over()
@@ -161,8 +169,21 @@ class DarkSanctum:
                 # Menu controls
                 if self.state == GameState.MENU:
                     if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                        self.state = GameState.CLASS_SELECT
+
+                # Class selection controls
+                elif self.state == GameState.CLASS_SELECT:
+                    if event.key == pygame.K_LEFT:
+                        self.selected_class_index = (self.selected_class_index - 1) % len(ALL_CLASSES)
+                        self.selected_class = ALL_CLASSES[self.selected_class_index]
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_class_index = (self.selected_class_index + 1) % len(ALL_CLASSES)
+                        self.selected_class = ALL_CLASSES[self.selected_class_index]
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                         self.init_game()
                         self.state = GameState.PLAYING
+                    elif event.key == pygame.K_ESCAPE:
+                        self.state = GameState.MENU
 
                 # Game over controls
                 if self.state == GameState.GAME_OVER:
@@ -227,6 +248,96 @@ class DarkSanctum:
         credit = self.small_font.render("Created by Matrix AI Team", True, (100, 100, 120))
         credit_rect = credit.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 40))
         self.screen.blit(credit, credit_rect)
+
+    def _render_class_select(self):
+        """Render character class selection screen"""
+        self.screen.fill(COLOR_BACKGROUND)
+
+        # Title
+        title = self.title_font.render("SELECT CHARACTER", True, COLOR_GOLD)
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 80))
+        self.screen.blit(title, title_rect)
+
+        # Display all classes
+        class_width = 300
+        class_spacing = 50
+        total_width = len(ALL_CLASSES) * class_width + (len(ALL_CLASSES) - 1) * class_spacing
+        start_x = (WINDOW_WIDTH - total_width) // 2
+
+        for i, char_class in enumerate(ALL_CLASSES):
+            x = start_x + i * (class_width + class_spacing)
+            y = 200
+
+            # Highlight selected class
+            is_selected = (i == self.selected_class_index)
+
+            # Class box
+            box_color = char_class.color if is_selected else (50, 50, 60)
+            border_color = COLOR_GOLD if is_selected else (80, 80, 90)
+            border_width = 4 if is_selected else 2
+
+            box_rect = pygame.Rect(x, y, class_width, 300)
+            pygame.draw.rect(self.screen, box_color, box_rect)
+            pygame.draw.rect(self.screen, border_color, box_rect, border_width)
+
+            # Class name
+            name_surf = self.large_font.render(char_class.name, True, COLOR_WHITE)
+            name_rect = name_surf.get_rect(center=(x + class_width // 2, y + 40))
+            self.screen.blit(name_surf, name_rect)
+
+            # Stats
+            stats = [
+                f"HP: {int(char_class.health)}",
+                f"DMG: {int(char_class.damage)}",
+                f"SPD: {int(char_class.speed)}",
+                "",
+                f"{char_class.passive_name}",
+            ]
+
+            stat_y = y + 100
+            for stat in stats:
+                color = COLOR_GOLD if stat == char_class.passive_name else COLOR_WHITE
+                stat_surf = self.small_font.render(stat, True, color)
+                stat_rect = stat_surf.get_rect(center=(x + class_width // 2, stat_y))
+                self.screen.blit(stat_surf, stat_rect)
+                stat_y += 30
+
+            # Description (small font)
+            desc_lines = self._wrap_text(char_class.passive_description, 35)
+            desc_y = stat_y + 10
+            for line in desc_lines:
+                desc_surf = self.small_font.render(line, True, (180, 180, 180))
+                desc_rect = desc_surf.get_rect(center=(x + class_width // 2, desc_y))
+                self.screen.blit(desc_surf, desc_rect)
+                desc_y += 25
+
+        # Instructions
+        inst_text = "← → to Select | SPACE to Confirm | ESC to Back"
+        inst_surf = self.medium_font.render(inst_text, True, COLOR_WHITE)
+        inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 60))
+        self.screen.blit(inst_surf, inst_rect)
+
+    def _wrap_text(self, text: str, max_chars: int):
+        """Simple text wrapping"""
+        words = text.split()
+        lines = []
+        current_line = []
+        current_length = 0
+
+        for word in words:
+            if current_length + len(word) + 1 <= max_chars:
+                current_line.append(word)
+                current_length += len(word) + 1
+            else:
+                if current_line:
+                    lines.append(" ".join(current_line))
+                current_line = [word]
+                current_length = len(word)
+
+        if current_line:
+            lines.append(" ".join(current_line))
+
+        return lines
 
     def _render_pause(self):
         """Render pause overlay"""
