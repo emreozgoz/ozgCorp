@@ -1,0 +1,232 @@
+"""
+DARK SANCTUM - Components
+Matrix Team: Game Designer + Developer
+
+All game components following ECS pattern
+"""
+
+from src.core.ecs import Component
+import pygame
+from typing import Optional, Callable
+
+
+# === CORE COMPONENTS ===
+
+class Position(Component):
+    """Entity position in world space"""
+
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+
+class Velocity(Component):
+    """Entity velocity (pixels per second)"""
+
+    def __init__(self, vx: float = 0, vy: float = 0):
+        self.vx = vx
+        self.vy = vy
+
+
+class Size(Component):
+    """Entity size (for collision and rendering)"""
+
+    def __init__(self, width: float, height: float):
+        self.width = width
+        self.height = height
+
+
+class Sprite(Component):
+    """Visual representation"""
+
+    def __init__(self, color: tuple, radius: Optional[float] = None):
+        self.color = color
+        self.radius = radius  # If not None, draw as circle
+
+
+# === COMBAT COMPONENTS ===
+
+class Health(Component):
+    """Health and damage tracking"""
+
+    def __init__(self, max_health: float, current: Optional[float] = None):
+        self.max_health = max_health
+        self.current = current if current is not None else max_health
+        self.regeneration = 0.0  # HP per second
+
+    @property
+    def is_alive(self) -> bool:
+        return self.current > 0
+
+    @property
+    def percent(self) -> float:
+        return self.current / self.max_health if self.max_health > 0 else 0
+
+    def damage(self, amount: float):
+        """Take damage"""
+        self.current = max(0, self.current - amount)
+
+    def heal(self, amount: float):
+        """Heal"""
+        self.current = min(self.max_health, self.current + amount)
+
+
+class Damage(Component):
+    """Damage dealer"""
+
+    def __init__(self, amount: float):
+        self.amount = amount
+
+
+class Team(Component):
+    """Team affiliation for combat"""
+
+    def __init__(self, team: str):
+        self.team = team  # "player" or "enemy"
+
+
+# === PLAYER COMPONENTS ===
+
+class Player(Component):
+    """Marks entity as player"""
+
+    def __init__(self):
+        self.move_speed = 250.0
+
+
+class Experience(Component):
+    """XP and leveling"""
+
+    def __init__(self):
+        self.current_xp = 0
+        self.level = 1
+        self.xp_to_next_level = 100
+
+    def add_xp(self, amount: int) -> bool:
+        """Add XP, return True if leveled up"""
+        self.current_xp += amount
+        if self.current_xp >= self.xp_to_next_level:
+            return self._level_up()
+        return False
+
+    def _level_up(self) -> bool:
+        """Level up"""
+        self.current_xp -= self.xp_to_next_level
+        self.level += 1
+        self.xp_to_next_level = int(self.xp_to_next_level * 1.5)
+        return True
+
+
+class AutoAttack(Component):
+    """Auto-attack system"""
+
+    def __init__(self, damage: float, range_: float, cooldown: float, projectile_speed: float):
+        self.damage = damage
+        self.range = range_
+        self.cooldown = cooldown
+        self.projectile_speed = projectile_speed
+        self.time_since_attack = 0.0
+
+    def can_attack(self) -> bool:
+        return self.time_since_attack >= self.cooldown
+
+    def attack(self):
+        """Reset cooldown"""
+        self.time_since_attack = 0.0
+
+    def update(self, dt: float):
+        """Update cooldown"""
+        self.time_since_attack += dt
+
+
+class Abilities(Component):
+    """4 ability slots (Q, W, E, R)"""
+
+    def __init__(self):
+        self.slots = {
+            'Q': None,
+            'W': None,
+            'E': None,
+            'R': None
+        }
+        self.cooldowns = {
+            'Q': 0.0,
+            'W': 0.0,
+            'E': 0.0,
+            'R': 0.0
+        }
+
+    def can_cast(self, key: str) -> bool:
+        """Check if ability can be cast"""
+        return self.cooldowns.get(key, float('inf')) <= 0.0
+
+    def cast(self, key: str, cooldown: float):
+        """Trigger ability cooldown"""
+        self.cooldowns[key] = cooldown
+
+    def update(self, dt: float):
+        """Update all cooldowns"""
+        for key in self.cooldowns:
+            self.cooldowns[key] = max(0.0, self.cooldowns[key] - dt)
+
+
+# === ENEMY COMPONENTS ===
+
+class Enemy(Component):
+    """Marks entity as enemy"""
+
+    def __init__(self, xp_value: int):
+        self.xp_value = xp_value
+
+
+class AIChase(Component):
+    """Simple chase AI - follow player"""
+
+    def __init__(self, speed: float):
+        self.speed = speed
+        self.target_entity = None  # Will be set to player
+
+
+# === PROJECTILE COMPONENTS ===
+
+class Projectile(Component):
+    """Projectile that damages on hit"""
+
+    def __init__(self, owner_team: str, damage: float, lifetime: float):
+        self.owner_team = owner_team
+        self.damage = damage
+        self.lifetime = lifetime  # Seconds before auto-destroy
+        self.time_alive = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Update lifetime, return True if expired"""
+        self.time_alive += dt
+        return self.time_alive >= self.lifetime
+
+
+# === UTILITY COMPONENTS ===
+
+class Lifetime(Component):
+    """Auto-destroy after time"""
+
+    def __init__(self, duration: float):
+        self.duration = duration
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.duration
+
+
+class Tag(Component):
+    """Generic tag for identification"""
+
+    def __init__(self, tag: str):
+        self.tag = tag
+
+
+# === GAME DESIGNER NOTE ===
+# Components are pure data - no logic
+# Logic lives in Systems
+# This separation keeps code clean and testable
