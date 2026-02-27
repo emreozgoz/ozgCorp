@@ -298,6 +298,9 @@ class DeathSystem(System):
                 audio_event = self.world.create_entity()
                 audio_event.add_component(AudioEvent('level_up'))
 
+                # Mark player for level-up choice
+                player.add_component(LevelUpPending())
+
                 print(f"⬆️ LEVEL UP! Now level {xp.level}")
 
 

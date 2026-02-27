@@ -339,6 +339,50 @@ class PowerUp(Component):
         return self.elapsed >= self.lifetime
 
 
+# === WEAPON COMPONENTS ===
+
+class WeaponInventory(Component):
+    """Player's weapon collection"""
+
+    def __init__(self):
+        # weapon_id -> level (1-5)
+        self.weapons = {}  # e.g., {"sword": 2, "magic_missile": 1}
+
+    def has_weapon(self, weapon_id: str) -> bool:
+        return weapon_id in self.weapons
+
+    def get_level(self, weapon_id: str) -> int:
+        return self.weapons.get(weapon_id, 0)
+
+    def add_weapon(self, weapon_id: str):
+        """Add new weapon at level 1"""
+        self.weapons[weapon_id] = 1
+
+    def upgrade_weapon(self, weapon_id: str):
+        """Increase weapon level"""
+        if weapon_id in self.weapons:
+            self.weapons[weapon_id] += 1
+        else:
+            self.weapons[weapon_id] = 1
+
+
+class WeaponInstance(Component):
+    """Active weapon instance"""
+
+    def __init__(self, weapon_id: str, level: int, owner_entity):
+        self.weapon_id = weapon_id
+        self.level = level
+        self.owner_entity = owner_entity
+        self.time_since_fire = 0.0
+
+
+class LevelUpPending(Component):
+    """Marks that player needs to choose upgrade"""
+
+    def __init__(self):
+        self.choices = []  # List of 3 weapon options
+
+
 # === GAME DESIGNER NOTE ===
 # Components are pure data - no logic
 # Logic lives in Systems

@@ -22,7 +22,9 @@ from src.systems.ability_system import (
 from src.systems.particle_system import ParticleSystem
 from src.systems.audio_system import AudioSystem
 from src.systems.powerup_system import PowerUpCollectionSystem
+from src.systems.weapon_system import WeaponFireSystem, LevelUpChoiceSystem
 from src.components.character_classes import *
+from src.components.weapons import *
 from config.settings import *
 
 
@@ -32,6 +34,7 @@ class GameState:
     CLASS_SELECT = "class_select"
     PLAYING = "playing"
     PAUSED = "paused"
+    LEVEL_UP = "level_up"  # Weapon selection
     GAME_OVER = "game_over"
 
 
@@ -67,6 +70,10 @@ class DarkSanctum:
         # Character selection
         self.selected_class_index = 0
         self.selected_class = ALL_CLASSES[0]
+
+        # Level-up choices
+        self.level_up_choices = []
+        self.selected_choice_index = 0
 
     def init_game(self):
         """Initialize new game"""

@@ -44,6 +44,7 @@ class EntityFactory:
             projectile_speed=AUTO_ATTACK_SPEED
         ))
         player.add_component(Abilities())
+        player.add_component(WeaponInventory())  # Weapon progression system
 
         # Tags
         player.add_component(Tag("player"))

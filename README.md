@@ -198,6 +198,19 @@ This game was developed by **18 specialized AI agents** working autonomously:
 - Varied enemy spawning (60% basic, 20% fast, 15% tank, 5% ranged)
 - Audio feedback for all actions
 
+**Sprint 7: Weapon Upgrade System** ⏳ (In Progress)
+- Weapon progression framework (Vampire Survivors-style)
+- 5 Unique weapons defined:
+  - ⚔️ Shadow Blade - Orbiting melee sword
+  - 🔮 Arcane Seeker - Homing magic missiles
+  - ⚡ Chain Lightning - Enemy-bouncing lightning
+  - 🧪 Blessed Vial - Ground puddles (DoT)
+  - 🧄 Garlic Aura - Defensive damage aura
+- WeaponInventory component for player progression
+- WeaponFireSystem for automatic weapon attacks
+- Level-up trigger system
+- Each weapon upgradeable 1-5 levels
+
 ---
 
 ## 🎯 What Makes Dark Sanctum Different?
