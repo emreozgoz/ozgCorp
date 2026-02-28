@@ -824,10 +824,19 @@ class DarkSanctum:
                 evo_rect = evo_banner.get_rect(center=(x + card_width // 2, start_y + 30))
                 self.screen.blit(evo_banner, evo_rect)
 
-                # Evolved icon
-                icon_surf = self.title_font.render(evolution_data.evolved_icon, True, GOTHIC_BONE)
-                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
-                self.screen.blit(icon_surf, icon_rect)
+                # Evolved icon (Sprint 28: Pixel art sprite)
+                from src.core.asset_manager import asset_manager
+                weapon_icon = asset_manager.get_sprite(f'weapon_{choice["weapon_id"]}')
+                if weapon_icon:
+                    # Scale up 2x for better visibility (32x32 → 64x64)
+                    scaled_icon = pygame.transform.scale(weapon_icon, (64, 64))
+                    icon_rect = scaled_icon.get_rect(center=(x + card_width // 2, start_y + 80))
+                    self.screen.blit(scaled_icon, icon_rect)
+                else:
+                    # Fallback: emoji (if sprite not found)
+                    icon_surf = self.title_font.render(evolution_data.evolved_icon, True, GOTHIC_BONE)
+                    icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
+                    self.screen.blit(icon_surf, icon_rect)
 
                 # Evolved name
                 name_surf = self.medium_font.render(evolution_data.evolved_name, True, GOTHIC_GOLD)
@@ -874,10 +883,19 @@ class DarkSanctum:
                 card_rect = pygame.Rect(x, start_y, card_width, card_height)
                 GothicPanel.draw(self.screen, card_rect, card_color, border_color, border_width)
 
-                # Weapon icon (large emoji)
-                icon_surf = self.title_font.render(weapon_data.icon, True, GOTHIC_BONE)
-                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
-                self.screen.blit(icon_surf, icon_rect)
+                # Weapon icon (Sprint 28: Pixel art sprite instead of emoji)
+                from src.core.asset_manager import asset_manager
+                weapon_icon = asset_manager.get_sprite(f'weapon_{choice["weapon_id"]}')
+                if weapon_icon:
+                    # Scale up 2x for better visibility (32x32 → 64x64)
+                    scaled_icon = pygame.transform.scale(weapon_icon, (64, 64))
+                    icon_rect = scaled_icon.get_rect(center=(x + card_width // 2, start_y + 60))
+                    self.screen.blit(scaled_icon, icon_rect)
+                else:
+                    # Fallback: emoji (if sprite not found)
+                    icon_surf = self.title_font.render(weapon_data.icon, True, GOTHIC_BONE)
+                    icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
+                    self.screen.blit(icon_surf, icon_rect)
 
                 # Weapon name
                 name_color = GOTHIC_BONE if is_selected else GOTHIC_SILVER
