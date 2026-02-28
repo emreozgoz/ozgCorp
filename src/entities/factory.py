@@ -29,7 +29,11 @@ class EntityFactory:
         player.add_component(Position(x, y))
         player.add_component(Velocity(0, 0))
         player.add_component(Size(PLAYER_SIZE, PLAYER_SIZE))
-        player.add_component(Sprite(character_class.color, radius=PLAYER_SIZE / 2))
+
+        # Sprint 22: Add sprite support alongside old Sprite component
+        player.add_component(Sprite(character_class.color, radius=PLAYER_SIZE / 2))  # Legacy fallback
+        if character_class.sprite_key:
+            player.add_component(SpriteComponent(character_class.sprite_key, PLAYER_SIZE))
 
         # Combat components (apply difficulty multipliers)
         player.add_component(Health(character_class.health * multipliers['player_health']))
@@ -81,7 +85,9 @@ class EntityFactory:
 
             # Elite enemies have golden color, regular enemies normal color
             color = (255, 215, 0) if is_elite else ENEMY_COLOR
-            enemy.add_component(Sprite(color, radius=ENEMY_SIZE / 2))
+            enemy.add_component(Sprite(color, radius=ENEMY_SIZE / 2))  # Legacy fallback
+            # Sprint 22: Add sprite support
+            enemy.add_component(SpriteComponent("enemy_basic", ENEMY_SIZE))
 
             # Combat components (apply difficulty + elite multipliers)
             elite_health_mult = 2.0 if is_elite else 1.0
@@ -120,7 +126,8 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2))  # Legacy fallback
+        enemy.add_component(SpriteComponent("enemy_imp", int(size)))  # Sprint 22
         enemy.add_component(Health(ENEMY_BASE_HEALTH * FAST_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * FAST_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))
@@ -148,7 +155,8 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2))  # Legacy fallback
+        enemy.add_component(SpriteComponent("enemy_golem", int(size)))  # Sprint 22
         enemy.add_component(Health(ENEMY_BASE_HEALTH * TANK_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * TANK_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))
@@ -176,7 +184,8 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2))  # Legacy fallback
+        enemy.add_component(SpriteComponent("enemy_wraith", int(size)))  # Sprint 22
         enemy.add_component(Health(ENEMY_BASE_HEALTH * RANGED_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * RANGED_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))

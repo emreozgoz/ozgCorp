@@ -9,6 +9,7 @@ import pygame
 from src.core.ecs import System
 from src.components.components import *
 from config.settings import *
+from src.core.asset_manager import asset_manager
 
 
 class RenderSystem(System):
@@ -59,55 +60,126 @@ class RenderSystem(System):
         return (0, 0)
 
     def _render_sprites(self, camera_offset: tuple[float, float] = (0, 0)):
-        """Render all entities with sprites"""
-        entities = self.get_entities(Position, Sprite, Size)
+        """Render all entities with sprites (image-based or procedural)"""
+        # Get entities with position
+        all_entities = self.get_entities(Position)
 
-        for entity in entities:
+        for entity in all_entities:
             pos = entity.get_component(Position)
-            sprite = entity.get_component(Sprite)
-            size = entity.get_component(Size)
 
             # Apply camera offset for screen shake
             render_x = int(pos.x + camera_offset[0])
             render_y = int(pos.y + camera_offset[1])
 
-            # Check for hit flash
-            from src.systems.screen_effects import HitFlash
-            hit_flash = entity.get_component(HitFlash) if entity.has_component(HitFlash) else None
-            flash_color = (255, 255, 255) if (hit_flash and hit_flash.active) else sprite.color
+            # Check for SpriteComponent first (image-based rendering)
+            if entity.has_component(SpriteComponent):
+                self._render_sprite_component(entity, render_x, render_y)
 
-            # Check if boss (render glow)
+            # Fall back to old Sprite component (procedural rendering)
+            elif entity.has_component(Sprite) and entity.has_component(Size):
+                self._render_procedural_sprite(entity, render_x, render_y)
+
+    def _render_sprite_component(self, entity, render_x: int, render_y: int):
+        """Render entity with SpriteComponent (image-based)"""
+        sprite_comp = entity.get_component(SpriteComponent)
+
+        # Get sprite image from asset manager
+        sprite_surface = asset_manager.create_procedural_sprite(
+            sprite_comp.sprite_key,
+            sprite_comp.size
+        )
+
+        # Check for animation
+        if entity.has_component(AnimationComponent):
+            anim = entity.get_component(AnimationComponent)
+            frame = anim.get_current_frame()
+            if frame:
+                sprite_surface = frame
+
+        # Apply transformations
+        if sprite_comp.flip_x or sprite_comp.flip_y:
+            sprite_surface = pygame.transform.flip(
+                sprite_surface,
+                sprite_comp.flip_x,
+                sprite_comp.flip_y
+            )
+
+        if sprite_comp.rotation != 0:
+            sprite_surface = pygame.transform.rotate(sprite_surface, sprite_comp.rotation)
+
+        if sprite_comp.alpha < 255:
+            sprite_surface.set_alpha(sprite_comp.alpha)
+
+        # Check for hit flash
+        from src.systems.screen_effects import HitFlash
+        if entity.has_component(HitFlash):
+            hit_flash = entity.get_component(HitFlash)
+            if hit_flash.active:
+                # Create white flash overlay
+                flash_surf = sprite_surface.copy()
+                flash_surf.fill((255, 255, 255, 180), special_flags=pygame.BLEND_ADD)
+                sprite_surface = flash_surf
+
+        # Check if boss (render glow)
+        if entity.has_component(Enemy):
             enemy = entity.get_component(Enemy)
-            is_boss = enemy and enemy.is_boss
-
-            if sprite.radius:
-                # Boss glow effect
-                if is_boss:
-                    # Outer glow
-                    pygame.draw.circle(
-                        self.screen,
-                        BOSS_GLOW_COLOR,
-                        (render_x, render_y),
-                        int(sprite.radius + 5),
-                        3
-                    )
-
-                # Draw as circle (with hit flash)
+            if enemy.is_boss:
+                # Outer glow effect
+                glow_size = sprite_comp.size + 10
                 pygame.draw.circle(
                     self.screen,
-                    flash_color,
+                    BOSS_GLOW_COLOR,
                     (render_x, render_y),
-                    int(sprite.radius)
+                    glow_size // 2,
+                    3
                 )
-            else:
-                # Draw as rectangle
-                rect = pygame.Rect(
-                    int(render_x - size.width / 2),
-                    int(render_y - size.height / 2),
-                    int(size.width),
-                    int(size.height)
+
+        # Blit sprite centered on position
+        sprite_rect = sprite_surface.get_rect(center=(render_x, render_y))
+        self.screen.blit(sprite_surface, sprite_rect)
+
+    def _render_procedural_sprite(self, entity, render_x: int, render_y: int):
+        """Render entity with old Sprite component (procedural circles/rects)"""
+        sprite = entity.get_component(Sprite)
+        size = entity.get_component(Size)
+
+        # Check for hit flash
+        from src.systems.screen_effects import HitFlash
+        hit_flash = entity.get_component(HitFlash) if entity.has_component(HitFlash) else None
+        flash_color = (255, 255, 255) if (hit_flash and hit_flash.active) else sprite.color
+
+        # Check if boss (render glow)
+        enemy = entity.get_component(Enemy)
+        is_boss = enemy and enemy.is_boss
+
+        if sprite.radius:
+            # Boss glow effect
+            if is_boss:
+                # Outer glow
+                pygame.draw.circle(
+                    self.screen,
+                    BOSS_GLOW_COLOR,
+                    (render_x, render_y),
+                    int(sprite.radius + 5),
+                    3
                 )
-                pygame.draw.rect(self.screen, sprite.color, rect)
+
+            # Draw as circle (with hit flash)
+            pygame.draw.circle(
+                self.screen,
+                flash_color,
+                (render_x, render_y),
+                int(sprite.radius)
+            )
+        else:
+            # Draw as rectangle
+            rect = pygame.Rect(
+                int(render_x - size.width / 2),
+                int(render_y - size.height / 2),
+                int(size.width),
+                int(size.height)
+            )
+            pygame.draw.rect(self.screen, sprite.color, rect)
 
     def _render_health_bars(self, camera_offset: tuple[float, float] = (0, 0)):
         """Render health bars above entities"""

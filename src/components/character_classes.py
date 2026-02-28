@@ -21,6 +21,7 @@ class CharacterClass:
     color: tuple
     passive_name: str
     passive_description: str
+    sprite_key: str = ""  # Sprite identifier for asset manager (Sprint 22)
 
     # Passive bonuses
     ability_damage_mult: float = 1.0
@@ -39,6 +40,7 @@ SHADOW_KNIGHT = CharacterClass(
     color=(150, 100, 200),  # Purple
     passive_name="Shadow Step",
     passive_description="Shadow Dash cooldown reduced by 25%",
+    sprite_key="player_shadow_knight",
     ability_cooldown_mult=0.75  # Only for Q ability
 )
 
@@ -51,6 +53,7 @@ BLOOD_MAGE = CharacterClass(
     color=(180, 40, 60),  # Crimson
     passive_name="Blood Magic",
     passive_description="All abilities deal 50% more damage",
+    sprite_key="player_blood_mage",
     ability_damage_mult=1.5
 )
 
@@ -63,6 +66,7 @@ VOID_GUARDIAN = CharacterClass(
     color=(60, 120, 160),  # Dark cyan
     passive_name="Iron Will",
     passive_description="Take 25% less damage from all sources",
+    sprite_key="player_void_guardian",
     damage_reduction=0.25
 )
 
@@ -75,6 +79,7 @@ NECROMANCER = CharacterClass(
     color=(100, 50, 120),  # Dark purple
     passive_name="Soul Harvest",
     passive_description="Weapons deal 10% more damage (stacks 5x on kills)",
+    sprite_key="player_necromancer",
     ability_damage_mult=1.0  # Base, will be modified by kills in-game
 )
 
@@ -87,6 +92,7 @@ TEMPEST_RANGER = CharacterClass(
     color=(80, 180, 140),  # Forest green
     passive_name="Wind Walker",
     passive_description="Projectile weapons fire 30% faster and fly further",
+    sprite_key="player_tempest_ranger",
     ability_cooldown_mult=0.7  # Affects projectile weapon cooldowns
 )
 
