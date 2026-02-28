@@ -181,10 +181,11 @@ class Abilities(Component):
 class Enemy(Component):
     """Marks entity as enemy"""
 
-    def __init__(self, xp_value: int, is_boss: bool = False, enemy_type: str = "basic"):
+    def __init__(self, xp_value: int, is_boss: bool = False, enemy_type: str = "basic", is_elite: bool = False):
         self.xp_value = xp_value
         self.is_boss = is_boss
         self.enemy_type = enemy_type  # "basic", "fast", "tank", "ranged"
+        self.is_elite = is_elite  # Elite variant (2x HP, 1.5x damage, guaranteed drop)
 
 
 class AIChase(Component):

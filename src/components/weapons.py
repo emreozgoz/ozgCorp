@@ -103,8 +103,53 @@ GARLIC = WeaponData(
     color=(200, 200, 150)
 )
 
+# === NEW WEAPONS (Sprint 11) ===
+
+SHADOW_SCYTHE = WeaponData(
+    id="shadow_scythe",
+    name="Death's Scythe",
+    description="Massive rotating scythe that cleaves through enemies",
+    icon="🗡️",
+    max_level=5,
+    damage_per_level=[25, 35, 50, 70, 100],
+    cooldown_per_level=[2.0, 1.8, 1.6, 1.3, 1.0],
+    range_per_level=[100, 120, 140, 170, 200],  # Rotation radius
+    projectile_count_per_level=[1, 2, 2, 3, 3],  # Number of scythes
+    weapon_type="melee",
+    color=(120, 60, 180)  # Dark purple
+)
+
+FROST_NOVA = WeaponData(
+    id="frost_nova",
+    name="Frost Orb",
+    description="Ice projectiles that slow and freeze enemies",
+    icon="❄️",
+    max_level=5,
+    damage_per_level=[10, 16, 24, 35, 50],
+    cooldown_per_level=[2.5, 2.3, 2.0, 1.7, 1.4],
+    range_per_level=[300, 350, 400, 450, 500],
+    projectile_count_per_level=[1, 2, 3, 4, 5],
+    weapon_type="projectile",
+    color=(100, 200, 255)  # Ice blue
+)
+
+BLOOD_LANCE = WeaponData(
+    id="blood_lance",
+    name="Crimson Spear",
+    description="Piercing blood lances that penetrate multiple enemies",
+    icon="🔱",
+    max_level=5,
+    damage_per_level=[18, 28, 42, 60, 85],
+    cooldown_per_level=[1.8, 1.6, 1.4, 1.2, 1.0],
+    range_per_level=[350, 400, 450, 500, 600],  # Pierce range
+    projectile_count_per_level=[1, 1, 2, 3, 4],  # Number of lances
+    weapon_type="projectile",
+    color=(200, 30, 30)  # Blood red
+)
+
 # All available weapons
-ALL_WEAPONS = [SWORD, MAGIC_MISSILE, LIGHTNING_CHAIN, HOLY_WATER, GARLIC]
+ALL_WEAPONS = [SWORD, MAGIC_MISSILE, LIGHTNING_CHAIN, HOLY_WATER, GARLIC,
+               SHADOW_SCYTHE, FROST_NOVA, BLOOD_LANCE]
 
 # Weapon pool for level up choices
 WEAPON_POOL = {
@@ -112,7 +157,10 @@ WEAPON_POOL = {
     "magic_missile": MAGIC_MISSILE,
     "lightning": LIGHTNING_CHAIN,
     "holy_water": HOLY_WATER,
-    "garlic": GARLIC
+    "garlic": GARLIC,
+    "shadow_scythe": SHADOW_SCYTHE,
+    "frost_nova": FROST_NOVA,
+    "blood_lance": BLOOD_LANCE
 }
 
 
@@ -128,4 +176,8 @@ def get_weapon_by_id(weapon_id: str) -> Optional[WeaponData]:
 # - Lightning: Crowd control for groups
 # - Holy Water: Area denial and zone control
 # - Garlic: Passive defense for tank builds
+# - Shadow Scythe: High damage melee, slower but devastating
+# - Frost Nova: Crowd control with slow effect
+# - Blood Lance: Piercing projectiles for grouped enemies
 # Each weapon has meaningful upgrades at each level
+# Sprint 11: Added 3 new weapons (Total: 8 weapons)

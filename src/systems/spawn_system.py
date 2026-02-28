@@ -96,10 +96,15 @@ class WaveSpawnSystem(System):
         x = max(50, min(WINDOW_WIDTH - 50, x))
         y = max(50, min(WINDOW_HEIGHT - 50, y))
 
+        # 10% chance to spawn elite (after wave 3)
+        is_elite = False
+        if self.current_wave >= 3 and random.random() < 0.10:
+            is_elite = True
+
         # Create enemy using factory
         from src.entities.factory import EntityFactory
         factory = EntityFactory(self.world)
-        factory.create_enemy(x, y, enemy_type=enemy_type)
+        factory.create_enemy(x, y, enemy_type=enemy_type, is_elite=is_elite)
 
     def _spawn_boss(self, player_pos: Position):
         """Spawn boss enemy"""
@@ -283,12 +288,15 @@ class DeathSystem(System):
                     audio_event = self.world.create_entity()
                     audio_event.add_component(AudioEvent('enemy_death'))
 
-                    # Chance to spawn power-up (use difficulty multiplier)
+                    # Spawn power-up (guaranteed for elites, chance for regular)
                     pos = entity.get_component(Position)
                     multipliers = DifficultySettings.get_multipliers()
-                    if pos and random.random() < multipliers['powerup_drop_chance']:
+                    should_drop = enemy.is_elite or (random.random() < multipliers['powerup_drop_chance'])
+                    if pos and should_drop:
                         from src.systems.powerup_system import spawn_powerup
                         spawn_powerup(self.world, pos.x, pos.y)
+                        if enemy.is_elite:
+                            print(f"⭐ ELITE DEFEATED! Guaranteed drop spawned!")
 
                 # Player death sound
                 player = entity.get_component(Player)
