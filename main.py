@@ -37,6 +37,7 @@ from src.components.weapons import *
 from config.settings import *
 from config.difficulty import Difficulty, DifficultySettings
 from config.maps import *
+from config.ui_theme import *
 
 
 class GameState:
@@ -68,11 +69,11 @@ class DarkSanctum:
         self.world = World()
         self.factory = EntityFactory(self.world)
 
-        # Fonts
-        self.title_font = pygame.font.Font(None, 72)
-        self.large_font = pygame.font.Font(None, 48)
-        self.medium_font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
+        # Gothic UI Fonts (Sprint 24)
+        self.title_font = pygame.font.Font(None, FONT_TITLE)
+        self.large_font = pygame.font.Font(None, FONT_LARGE)
+        self.medium_font = pygame.font.Font(None, FONT_MEDIUM)
+        self.small_font = pygame.font.Font(None, FONT_SMALL)
 
         # Persistent stats
         self.persistent_stats = PersistentStats()
@@ -353,78 +354,74 @@ class DarkSanctum:
             self.state = GameState.GAME_OVER
 
     def _render_menu(self):
-        """Render main menu"""
-        self.screen.fill(COLOR_BACKGROUND)
+        """Render main menu with Gothic UI theme (Sprint 24)"""
+        self.screen.fill(GOTHIC_BLACK)
 
-        # Title
-        title = self.title_font.render("DARK SANCTUM", True, COLOR_BLOOD_RED)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 150))
-        self.screen.blit(title, title_rect)
+        # Draw ornate border around screen
+        draw_ornate_border(self.screen, GOTHIC_GOLD, BORDER_ORNATE)
+
+        # Title with Gothic header
+        GothicHeader.draw(self.screen, "DARK SANCTUM", 120, self.title_font, GLOW_CRIMSON, decoration=True)
 
         # Subtitle
-        subtitle = self.medium_font.render("Survive. Evolve. Dominate.", True, COLOR_GOLD)
-        subtitle_rect = subtitle.get_rect(center=(WINDOW_WIDTH // 2, 230))
+        subtitle = self.medium_font.render("Survive. Evolve. Dominate.", True, GOTHIC_BONE)
+        subtitle_rect = subtitle.get_rect(center=(WINDOW_WIDTH // 2, 200))
         self.screen.blit(subtitle, subtitle_rect)
 
-        # Difficulty selection
-        diff_title = self.medium_font.render("SELECT DIFFICULTY", True, COLOR_GOLD)
-        diff_title_rect = diff_title.get_rect(center=(WINDOW_WIDTH // 2, 320))
+        # Difficulty selection title
+        diff_title = self.medium_font.render("SELECT DIFFICULTY", True, GOTHIC_GOLD)
+        diff_title_rect = diff_title.get_rect(center=(WINDOW_WIDTH // 2, 280))
         self.screen.blit(diff_title, diff_title_rect)
 
-        # Difficulty boxes
+        # Difficulty buttons using Gothic UI
         diff_names = ["EASY", "NORMAL", "HARD"]
-        diff_colors = [(100, 200, 100), (200, 200, 100), (200, 100, 100)]
-        box_width = 150
-        box_spacing = 30
+        box_width = 180
+        box_spacing = 40
         total_width = len(diff_names) * box_width + (len(diff_names) - 1) * box_spacing
         start_x = (WINDOW_WIDTH - total_width) // 2
-        y = 380
+        y = 340
 
         for i, name in enumerate(diff_names):
             x = start_x + i * (box_width + box_spacing)
             is_selected = (i == self.selected_difficulty_index)
 
-            # Box
-            box_rect = pygame.Rect(x, y, box_width, 60)
-            border_color = COLOR_GOLD if is_selected else (80, 80, 90)
-            border_width = 4 if is_selected else 2
+            button_rect = pygame.Rect(x, y, box_width, 70)
+            GothicButton.draw(
+                self.screen, button_rect, name,
+                self.medium_font,
+                is_selected=is_selected
+            )
 
-            pygame.draw.rect(self.screen, (40, 40, 50), box_rect)
-            pygame.draw.rect(self.screen, border_color, box_rect, border_width)
+        # Instructions panel
+        inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 250, 460, 500, 100)
+        GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
 
-            # Difficulty name
-            text_color = diff_colors[i] if is_selected else (120, 120, 120)
-            text = self.medium_font.render(name, True, text_color)
-            text_rect = text.get_rect(center=(x + box_width // 2, y + 30))
-            self.screen.blit(text, text_rect)
-
-        # Instructions
         instructions = [
-            "",
             "← → to select difficulty",
             "Press SPACE to Continue"
         ]
 
-        y_offset = 480
+        y_offset = 485
         for line in instructions:
-            text = self.small_font.render(line, True, COLOR_WHITE)
+            text = self.small_font.render(line, True, GOTHIC_SILVER)
             text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
             self.screen.blit(text, text_rect)
-            y_offset += 35
+            y_offset += 30
 
         # Credits
-        credit = self.small_font.render("Created by Matrix AI Team", True, (100, 100, 120))
-        credit_rect = credit.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 40))
+        credit = self.small_font.render("Created by Matrix AI Team", True, GOTHIC_MIST)
+        credit_rect = credit.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30))
         self.screen.blit(credit, credit_rect)
 
     def _render_class_select(self):
-        """Render character class selection screen"""
-        self.screen.fill(COLOR_BACKGROUND)
+        """Render character class selection screen with Gothic UI (Sprint 24)"""
+        self.screen.fill(GOTHIC_BLACK)
 
-        # Title
-        title = self.title_font.render("SELECT CHARACTER", True, COLOR_GOLD)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 80))
-        self.screen.blit(title, title_rect)
+        # Draw ornate border
+        draw_ornate_border(self.screen, GOTHIC_GOLD, BORDER_ORNATE)
+
+        # Title with Gothic header
+        GothicHeader.draw(self.screen, "SELECT CHARACTER", 60, self.title_font, GOTHIC_GOLD, decoration=True)
 
         # Display all classes
         class_width = 300
@@ -434,22 +431,22 @@ class DarkSanctum:
 
         for i, char_class in enumerate(ALL_CLASSES):
             x = start_x + i * (class_width + class_spacing)
-            y = 200
+            y = 140
 
             # Highlight selected class
             is_selected = (i == self.selected_class_index)
 
-            # Class box
-            box_color = char_class.color if is_selected else (50, 50, 60)
-            border_color = COLOR_GOLD if is_selected else (80, 80, 90)
-            border_width = 4 if is_selected else 2
+            # Gothic class panel
+            box_color = char_class.color if is_selected else GOTHIC_SHADOW
+            border_color = GOTHIC_GOLD if is_selected else GOTHIC_PURPLE
+            border_width = BORDER_THICK if is_selected else BORDER_MEDIUM
 
-            box_rect = pygame.Rect(x, y, class_width, 300)
-            pygame.draw.rect(self.screen, box_color, box_rect)
-            pygame.draw.rect(self.screen, border_color, box_rect, border_width)
+            box_rect = pygame.Rect(x, y, class_width, 380)
+            GothicPanel.draw(self.screen, box_rect, box_color, border_color, border_width)
 
             # Class name
-            name_surf = self.large_font.render(char_class.name, True, COLOR_WHITE)
+            name_color = GOTHIC_BONE if is_selected else GOTHIC_SILVER
+            name_surf = self.large_font.render(char_class.name, True, name_color)
             name_rect = name_surf.get_rect(center=(x + class_width // 2, y + 40))
             self.screen.blit(name_surf, name_rect)
 
@@ -464,7 +461,7 @@ class DarkSanctum:
 
             stat_y = y + 100
             for stat in stats:
-                color = COLOR_GOLD if stat == char_class.passive_name else COLOR_WHITE
+                color = GOTHIC_GOLD if stat == char_class.passive_name else GOTHIC_BONE
                 stat_surf = self.small_font.render(stat, True, color)
                 stat_rect = stat_surf.get_rect(center=(x + class_width // 2, stat_y))
                 self.screen.blit(stat_surf, stat_rect)
@@ -474,14 +471,17 @@ class DarkSanctum:
             desc_lines = self._wrap_text(char_class.passive_description, 35)
             desc_y = stat_y + 10
             for line in desc_lines:
-                desc_surf = self.small_font.render(line, True, (180, 180, 180))
+                desc_surf = self.small_font.render(line, True, GOTHIC_MIST)
                 desc_rect = desc_surf.get_rect(center=(x + class_width // 2, desc_y))
                 self.screen.blit(desc_surf, desc_rect)
                 desc_y += 25
 
-        # Instructions
+        # Instructions panel
+        inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 350, WINDOW_HEIGHT - 90, 700, 60)
+        GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
+
         inst_text = "← → to Select | SPACE to Confirm | ESC to Back"
-        inst_surf = self.medium_font.render(inst_text, True, COLOR_WHITE)
+        inst_surf = self.medium_font.render(inst_text, True, GOTHIC_SILVER)
         inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 60))
         self.screen.blit(inst_surf, inst_rect)
 
@@ -508,17 +508,14 @@ class DarkSanctum:
         return lines
 
     def _render_pause(self):
-        """Render enhanced pause overlay with stats"""
+        """Render enhanced pause overlay with stats (Gothic UI - Sprint 24)"""
         # Darken screen
-        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-        overlay.set_alpha(200)
-        overlay.fill((0, 0, 0))
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        overlay.fill(OVERLAY_DARK)
         self.screen.blit(overlay, (0, 0))
 
-        # Paused text
-        text = self.title_font.render("PAUSED", True, COLOR_GOLD)
-        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 100))
-        self.screen.blit(text, text_rect)
+        # Gothic title
+        GothicHeader.draw(self.screen, "PAUSED", 80, self.title_font, GOTHIC_GOLD, decoration=True)
 
         # Get player stats if available
         player_entities = self.world.get_entities_with_components(Player, Experience, Health)
@@ -532,21 +529,20 @@ class DarkSanctum:
             if player.has_component(GameStats):
                 game_stats = player.get_component(GameStats)
 
-                # Stats panel
-                panel_width = 600
-                panel_height = 350
+                # Gothic stats panel
+                panel_width = 700
+                panel_height = 400
                 panel_x = (WINDOW_WIDTH - panel_width) // 2
-                panel_y = 180
+                panel_y = 150
 
-                # Panel background
+                # Gothic panel background
                 panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
-                pygame.draw.rect(self.screen, (20, 15, 30), panel_rect)
-                pygame.draw.rect(self.screen, COLOR_ARCANE_BLUE, panel_rect, 3)
+                GothicPanel.draw(self.screen, panel_rect, GOTHIC_SHADOW, GLOW_ARCANE, BORDER_ORNATE)
 
                 # Character info
-                char_name = player.get_component(Player).character_class
-                char_text = self.large_font.render(f"⚔️  {char_name}", True, COLOR_WHITE)
-                char_rect = char_text.get_rect(center=(WINDOW_WIDTH // 2, panel_y + 40))
+                char_name = player.get_component(Player).character_class_name
+                char_text = self.large_font.render(f"⚔️  {char_name}", True, GOTHIC_GOLD)
+                char_rect = char_text.get_rect(center=(WINDOW_WIDTH // 2, panel_y + 50))
                 self.screen.blit(char_text, char_rect)
 
                 # Player stats (2 columns)
@@ -563,12 +559,12 @@ class DarkSanctum:
                 ]
 
                 for stat in left_stats:
-                    stat_surf = self.medium_font.render(stat, True, COLOR_WHITE)
+                    stat_surf = self.medium_font.render(stat, True, GOTHIC_BONE)
                     stat_rect = stat_surf.get_rect(midleft=(left_x, stats_y))
                     self.screen.blit(stat_surf, stat_rect)
                     stats_y += 40
 
-                stats_y = panel_y + 90
+                stats_y = panel_y + 100
                 right_stats = [
                     f"Time: {game_stats.get_survival_time_str()}",
                     f"Damage: {int(game_stats.damage_dealt)}",
@@ -578,48 +574,55 @@ class DarkSanctum:
                 ]
 
                 for stat in right_stats:
-                    stat_surf = self.medium_font.render(stat, True, COLOR_WHITE)
+                    stat_surf = self.medium_font.render(stat, True, GOTHIC_BONE)
                     stat_rect = stat_surf.get_rect(midleft=(right_x, stats_y))
                     self.screen.blit(stat_surf, stat_rect)
                     stats_y += 40
 
-        # Instructions
-        inst_y = WINDOW_HEIGHT - 120
+        # Instructions panel
+        inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT - 120, 400, 80)
+        GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
+
+        inst_y = WINDOW_HEIGHT - 100
         instructions = [
             "ESC - Resume Game",
             "Q - Quit to Menu"
         ]
 
         for i, inst in enumerate(instructions):
-            inst_surf = self.small_font.render(inst, True, (180, 180, 180))
+            inst_surf = self.small_font.render(inst, True, GOTHIC_SILVER)
             inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, inst_y + i * 30))
             self.screen.blit(inst_surf, inst_rect)
 
     def _render_game_over(self):
-        """Render game over screen with detailed stats and high scores"""
-        self.screen.fill(COLOR_BACKGROUND)
+        """Render game over screen with Gothic UI (Sprint 24)"""
+        self.screen.fill(GOTHIC_BLACK)
 
-        # Game Over text
-        title = self.title_font.render("DEFEATED", True, COLOR_BLOOD_RED)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 60))
-        self.screen.blit(title, title_rect)
+        # Draw ornate border
+        draw_ornate_border(self.screen, GLOW_CRIMSON, BORDER_ORNATE)
+
+        # Gothic title
+        GothicHeader.draw(self.screen, "DEFEATED", 50, self.title_font, GLOW_CRIMSON, decoration=True)
 
         # High score indicator
         if self.is_new_high_score:
-            hs_text = self.large_font.render("🏆 NEW HIGH SCORE! 🏆", True, COLOR_GOLD)
-            hs_rect = hs_text.get_rect(center=(WINDOW_WIDTH // 2, 130))
+            hs_text = self.large_font.render("🏆 NEW HIGH SCORE! 🏆", True, GOTHIC_GOLD)
+            hs_rect = hs_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
             self.screen.blit(hs_text, hs_rect)
 
         # Character info
         char_text = f"{self.selected_class.name}"
         char_surf = self.medium_font.render(char_text, True, self.selected_class.color)
-        char_rect = char_surf.get_rect(center=(WINDOW_WIDTH // 2, 180))
+        char_rect = char_surf.get_rect(center=(WINDOW_WIDTH // 2, 165))
         self.screen.blit(char_surf, char_rect)
 
-        # Score
+        # Score panel
+        score_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 250, 200, 500, 70)
+        GothicPanel.draw(self.screen, score_panel_rect, GOTHIC_SHADOW, GOTHIC_GOLD, BORDER_ORNATE)
+
         score_text = f"SCORE: {self.final_score:,}"
-        score_surf = self.large_font.render(score_text, True, COLOR_GOLD)
-        score_rect = score_surf.get_rect(center=(WINDOW_WIDTH // 2, 230))
+        score_surf = self.large_font.render(score_text, True, GOTHIC_GOLD)
+        score_rect = score_surf.get_rect(center=(WINDOW_WIDTH // 2, 235))
         self.screen.blit(score_surf, score_rect)
 
         # Get player stats
@@ -643,7 +646,7 @@ class DarkSanctum:
             ]
 
             for stat in left_stats:
-                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                stat_surf = self.small_font.render(stat, True, GOTHIC_BONE)
                 stat_rect = stat_surf.get_rect(midleft=(left_x, stats_y))
                 self.screen.blit(stat_surf, stat_rect)
                 stats_y += 35
@@ -658,30 +661,36 @@ class DarkSanctum:
             ]
 
             for stat in right_stats:
-                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                stat_surf = self.small_font.render(stat, True, GOTHIC_BONE)
                 stat_rect = stat_surf.get_rect(midleft=(right_x, stats_y))
                 self.screen.blit(stat_surf, stat_rect)
                 stats_y += 35
 
-        # High scores table
-        hs_title = self.medium_font.render("TOP SCORES", True, COLOR_ARCANE_BLUE)
-        hs_title_rect = hs_title.get_rect(center=(WINDOW_WIDTH // 2, 450))
+        # High scores panel
+        hs_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 300, 440, 600, 200)
+        GothicPanel.draw(self.screen, hs_panel_rect, GOTHIC_SHADOW, GLOW_ARCANE, BORDER_MEDIUM)
+
+        hs_title = self.medium_font.render("TOP SCORES", True, GLOW_ARCANE)
+        hs_title_rect = hs_title.get_rect(center=(WINDOW_WIDTH // 2, 465))
         self.screen.blit(hs_title, hs_title_rect)
 
         high_scores = self.persistent_stats.data["high_scores"][:5]  # Top 5
-        hs_y = 490
+        hs_y = 505
         for i, entry in enumerate(high_scores):
             rank = i + 1
             score_line = f"{rank}. {entry['character'][:12]:<12} {entry['score']:>6,}  Lv.{entry['level']:<2}  W{entry['wave']:<2}"
-            color = COLOR_GOLD if rank == 1 else COLOR_WHITE
+            color = GOTHIC_GOLD if rank == 1 else GOTHIC_SILVER
             score_surf = self.small_font.render(score_line, True, color)
             score_rect = score_surf.get_rect(center=(WINDOW_WIDTH // 2, hs_y))
             self.screen.blit(score_surf, score_rect)
-            hs_y += 28
+            hs_y += 26
 
-        # Instructions
-        inst_y = WINDOW_HEIGHT - 60
-        inst1 = self.small_font.render("SPACE - Restart  |  ESC - Menu", True, (150, 150, 150))
+        # Instructions panel
+        inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 250, WINDOW_HEIGHT - 80, 500, 50)
+        GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
+
+        inst_y = WINDOW_HEIGHT - 55
+        inst1 = self.small_font.render("SPACE - Restart  |  ESC - Menu", True, GOTHIC_SILVER)
         inst1_rect = inst1.get_rect(center=(WINDOW_WIDTH // 2, inst_y))
         self.screen.blit(inst1, inst1_rect)
 
@@ -757,24 +766,21 @@ class DarkSanctum:
         self.level_up_choices = []
 
     def _render_level_up(self):
-        """Render level-up weapon selection screen"""
+        """Render level-up weapon selection screen with Gothic UI (Sprint 24)"""
         # Render game in background (paused)
         self.world.update(0)
 
-        # Dark overlay
-        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-        overlay.set_alpha(200)
-        overlay.fill((10, 5, 15))
+        # Gothic dark overlay
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        overlay.fill(OVERLAY_DARK)
         self.screen.blit(overlay, (0, 0))
 
-        # Title
-        title = self.large_font.render("LEVEL UP!", True, COLOR_GOLD)
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 80))
-        self.screen.blit(title, title_rect)
+        # Gothic title
+        GothicHeader.draw(self.screen, "LEVEL UP!", 60, self.large_font, GOTHIC_GOLD, decoration=True)
 
         # Instructions
-        inst = self.small_font.render("← → to Select | SPACE to Choose", True, COLOR_WHITE)
-        inst_rect = inst.get_rect(center=(WINDOW_WIDTH // 2, 130))
+        inst = self.small_font.render("← → to Select | SPACE to Choose", True, GOTHIC_SILVER)
+        inst_rect = inst.get_rect(center=(WINDOW_WIDTH // 2, 115))
         self.screen.blit(inst, inst_rect)
 
         if not self.level_up_choices:
@@ -801,14 +807,13 @@ class DarkSanctum:
                 from src.components.weapons import get_weapon_by_id
                 evolved_weapon = get_weapon_by_id(evolution_data.evolved_id)
 
-                # Card background (special evolution color)
-                card_color = evolved_weapon.color if is_selected else (60, 40, 80)
-                border_color = (255, 215, 0) if is_selected else (200, 150, 50)  # Golden
-                border_width = 6 if is_selected else 3
+                # Gothic evolution card
+                card_color = evolved_weapon.color if is_selected else GOTHIC_PURPLE
+                border_color = GOTHIC_GOLD if is_selected else (200, 150, 50)  # Golden
+                border_width = BORDER_ORNATE if is_selected else BORDER_THICK
 
                 card_rect = pygame.Rect(x, start_y, card_width, card_height)
-                pygame.draw.rect(self.screen, card_color, card_rect)
-                pygame.draw.rect(self.screen, border_color, card_rect, border_width)
+                GothicPanel.draw(self.screen, card_rect, card_color, border_color, border_width)
 
                 # EVOLUTION banner
                 evo_banner = self.medium_font.render("⚡ EVOLUTION ⚡", True, (255, 215, 0))
@@ -816,12 +821,12 @@ class DarkSanctum:
                 self.screen.blit(evo_banner, evo_rect)
 
                 # Evolved icon
-                icon_surf = self.title_font.render(evolution_data.evolved_icon, True, COLOR_WHITE)
+                icon_surf = self.title_font.render(evolution_data.evolved_icon, True, GOTHIC_BONE)
                 icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
                 self.screen.blit(icon_surf, icon_rect)
 
                 # Evolved name
-                name_surf = self.medium_font.render(evolution_data.evolved_name, True, (255, 215, 0))
+                name_surf = self.medium_font.render(evolution_data.evolved_name, True, GOTHIC_GOLD)
                 name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 130))
                 self.screen.blit(name_surf, name_rect)
 
@@ -851,38 +856,38 @@ class DarkSanctum:
                     desc_y += 20
 
             else:
-                # Regular weapon card rendering
+                # Regular weapon card with Gothic UI
                 weapon_data = choice['weapon_data']
                 current_level = choice['current_level']
                 next_level = choice['next_level']
                 is_new = choice['is_new']
 
-                # Card background
-                card_color = weapon_data.color if is_selected else (40, 35, 50)
-                border_color = COLOR_GOLD if is_selected else (80, 75, 90)
-                border_width = 4 if is_selected else 2
+                # Gothic card background
+                card_color = weapon_data.color if is_selected else GOTHIC_SHADOW
+                border_color = GOTHIC_GOLD if is_selected else GOTHIC_PURPLE
+                border_width = BORDER_THICK if is_selected else BORDER_MEDIUM
 
                 card_rect = pygame.Rect(x, start_y, card_width, card_height)
-                pygame.draw.rect(self.screen, card_color, card_rect)
-                pygame.draw.rect(self.screen, border_color, card_rect, border_width)
+                GothicPanel.draw(self.screen, card_rect, card_color, border_color, border_width)
 
                 # Weapon icon (large emoji)
-                icon_surf = self.title_font.render(weapon_data.icon, True, COLOR_WHITE)
+                icon_surf = self.title_font.render(weapon_data.icon, True, GOTHIC_BONE)
                 icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
                 self.screen.blit(icon_surf, icon_rect)
 
                 # Weapon name
-                name_surf = self.medium_font.render(weapon_data.name, True, COLOR_WHITE)
+                name_color = GOTHIC_BONE if is_selected else GOTHIC_SILVER
+                name_surf = self.medium_font.render(weapon_data.name, True, name_color)
                 name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 120))
                 self.screen.blit(name_surf, name_rect)
 
                 # Level indicator
                 if is_new:
                     level_text = "NEW!"
-                    level_color = COLOR_GOLD
+                    level_color = GOTHIC_GOLD
                 else:
                     level_text = f"Lv {current_level} → {next_level}"
-                    level_color = COLOR_ARCANE_BLUE
+                    level_color = GLOW_ARCANE
 
                 level_surf = self.small_font.render(level_text, True, level_color)
                 level_rect = level_surf.get_rect(center=(x + card_width // 2, start_y + 155))
@@ -900,7 +905,7 @@ class DarkSanctum:
 
                 stat_y = start_y + 190
                 for stat in stats_text:
-                    stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                    stat_surf = self.small_font.render(stat, True, GOTHIC_BONE)
                     stat_rect = stat_surf.get_rect(center=(x + card_width // 2, stat_y))
                     self.screen.blit(stat_surf, stat_rect)
                     stat_y += 25
@@ -909,7 +914,7 @@ class DarkSanctum:
                 desc_lines = self._wrap_text(weapon_data.description, 28)
                 desc_y = stat_y + 10
                 for line in desc_lines:
-                    desc_surf = self.small_font.render(line, True, (180, 180, 180))
+                    desc_surf = self.small_font.render(line, True, GOTHIC_MIST)
                     desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
                     self.screen.blit(desc_surf, desc_rect)
                     desc_y += 20
