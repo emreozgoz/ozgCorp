@@ -154,6 +154,225 @@ class AssetManager:
 
         return surface
 
+    def create_weapon_icon(self, weapon_id: str, size: int = 32) -> pygame.Surface:
+        """Create pixel art weapon icons for UI (Sprint 28)"""
+        surface = pygame.Surface((size, size), pygame.SRCALPHA)
+        center = (size // 2, size // 2)
+
+        if weapon_id == "arcane_seeker":
+            # Purple crystal orb with sparkles (BRIGHTER colors for visibility)
+            # Outer glow
+            pygame.draw.circle(surface, (120, 80, 220), center, 14)
+            # Main crystal
+            pygame.draw.circle(surface, (120, 80, 200), center, 12)
+            pygame.draw.circle(surface, (180, 140, 255), center, 8)
+            # Inner glow
+            pygame.draw.circle(surface, (220, 200, 255), center, 4)
+            # Sparkles at corners
+            sparkle_positions = [(8, 8), (24, 8), (8, 24), (24, 24)]
+            for pos in sparkle_positions:
+                pygame.draw.circle(surface, (200, 180, 255), pos, 2)
+                pygame.draw.circle(surface, (255, 255, 255), pos, 1)
+
+        elif weapon_id == "blood_whip":
+            # Red curved blade/whip (BRIGHTER for visibility)
+            # Handle (bottom)
+            pygame.draw.rect(surface, (80, 40, 40), (12, 20, 8, 10))
+            # Blade curve (bright red)
+            blade_points = [(16, 20), (20, 15), (24, 10), (26, 6), (24, 4)]
+            pygame.draw.lines(surface, (220, 40, 40), False, blade_points, 4)
+            pygame.draw.lines(surface, (255, 80, 80), False, blade_points, 2)
+            # Blood drips
+            pygame.draw.circle(surface, (200, 0, 0), (22, 12), 2)
+            pygame.draw.circle(surface, (180, 20, 20), (18, 16), 1)
+
+        elif weapon_id == "lightning_orb":
+            # Yellow lightning bolt
+            # Outer electric glow
+            pygame.draw.circle(surface, (255, 255, 100, 80), center, 14)
+            # Main lightning bolt (zigzag)
+            bolt_points = [(16, 6), (14, 12), (18, 14), (15, 20), (20, 16), (17, 24)]
+            pygame.draw.lines(surface, (255, 255, 100), False, bolt_points, 4)
+            # White core
+            pygame.draw.lines(surface, (255, 255, 255), False, bolt_points, 2)
+            # Electric sparks
+            spark_positions = [(10, 10), (22, 10), (10, 22), (22, 22)]
+            for pos in spark_positions:
+                pygame.draw.line(surface, (255, 255, 200), pos, (pos[0]+2, pos[1]+2), 1)
+
+        elif weapon_id == "toxic_cloud":
+            # Green poison flask with bubbles (BRIGHTER for visibility)
+            # Flask body
+            pygame.draw.rect(surface, (100, 200, 100), (10, 14, 12, 14), border_radius=2)
+            # Flask neck
+            pygame.draw.rect(surface, (80, 160, 80), (13, 10, 6, 6))
+            # Cork/cap
+            pygame.draw.rect(surface, (180, 120, 60), (13, 8, 6, 3))
+            # Liquid inside (bright green)
+            pygame.draw.rect(surface, (140, 255, 140), (11, 16, 10, 10))
+            # Bubbles
+            bubble_positions = [(14, 18), (18, 20), (15, 24)]
+            for pos in bubble_positions:
+                pygame.draw.circle(surface, (180, 255, 180), pos, 2)
+                pygame.draw.circle(surface, (240, 255, 240), pos, 1)
+            # Skull symbol (small)
+            pygame.draw.circle(surface, (80, 140, 80), (16, 20), 3)
+
+        elif weapon_id == "holy_barrier":
+            # Golden shield with cross
+            pygame.draw.circle(surface, (255, 215, 0), center, 14, 3)
+            pygame.draw.circle(surface, (255, 200, 50), center, 11, 2)
+            pygame.draw.line(surface, (255, 215, 0), (16, 8), (16, 24), 3)
+            pygame.draw.line(surface, (255, 215, 0), (10, 16), (22, 16), 3)
+            pygame.draw.circle(surface, (255, 255, 200), (13, 13), 3)
+            pygame.draw.circle(surface, (255, 255, 255), (13, 13), 1)
+
+        # Sprint 29: Add all remaining weapons
+        elif weapon_id == "sword":
+            # Silver sword
+            pygame.draw.polygon(surface, (180, 180, 200), [(16, 6), (18, 6), (18, 22), (16, 22)])
+            pygame.draw.polygon(surface, (220, 220, 240), [(15, 22), (19, 22), (17, 26)])
+            pygame.draw.rect(surface, (150, 120, 80), (15, 22, 4, 4))
+            pygame.draw.circle(surface, (255, 255, 255), (17, 10), 1)
+
+        elif weapon_id == "magic_missile":
+            # Purple magic missile
+            missile_points = [(16, 8), (20, 16), (16, 24), (12, 16)]
+            pygame.draw.polygon(surface, (150, 80, 200), missile_points)
+            pygame.draw.polygon(surface, (200, 120, 255), missile_points, 2)
+            pygame.draw.circle(surface, (255, 200, 255), center, 4)
+
+        elif weapon_id == "lightning":
+            # Yellow lightning (similar to lightning_orb)
+            bolt_points = [(16, 6), (14, 12), (18, 14), (15, 20), (20, 16), (17, 24)]
+            pygame.draw.lines(surface, (255, 255, 100), False, bolt_points, 4)
+            pygame.draw.lines(surface, (255, 255, 255), False, bolt_points, 2)
+
+        elif weapon_id == "holy_water":
+            # Blue holy water bottle
+            pygame.draw.rect(surface, (100, 150, 255), (12, 14, 8, 12), border_radius=2)
+            pygame.draw.rect(surface, (80, 120, 200), (13, 10, 6, 5))
+            pygame.draw.rect(surface, (150, 200, 255), (13, 16, 6, 8))
+            pygame.draw.circle(surface, (200, 230, 255), (16, 18), 2)
+
+        elif weapon_id == "garlic":
+            # White garlic aura
+            pygame.draw.circle(surface, (240, 240, 240), center, 12)
+            pygame.draw.circle(surface, (255, 255, 255), center, 8)
+            for angle in [0, 90, 180, 270]:
+                import math
+                x = int(center[0] + 10 * math.cos(math.radians(angle)))
+                y = int(center[1] + 10 * math.sin(math.radians(angle)))
+                pygame.draw.circle(surface, (255, 255, 240), (x, y), 3)
+
+        elif weapon_id == "shadow_scythe":
+            # Dark purple scythe
+            pygame.draw.arc(surface, (80, 40, 120), (8, 8, 16, 16), 0, 3.14, 4)
+            pygame.draw.line(surface, (60, 30, 90), (16, 16), (16, 26), 3)
+            pygame.draw.polygon(surface, (100, 50, 150), [(24, 8), (16, 12), (20, 16)])
+
+        elif weapon_id == "frost_nova":
+            # Light blue frost
+            pygame.draw.circle(surface, (150, 200, 255), center, 12)
+            pygame.draw.circle(surface, (200, 230, 255), center, 8)
+            # Snowflake pattern
+            for angle in [0, 60, 120, 180, 240, 300]:
+                import math
+                x1 = int(center[0] + 4 * math.cos(math.radians(angle)))
+                y1 = int(center[1] + 4 * math.sin(math.radians(angle)))
+                x2 = int(center[0] + 10 * math.cos(math.radians(angle)))
+                y2 = int(center[1] + 10 * math.sin(math.radians(angle)))
+                pygame.draw.line(surface, (255, 255, 255), (x1, y1), (x2, y2), 2)
+
+        elif weapon_id == "blood_lance":
+            # Dark red lance
+            pygame.draw.polygon(surface, (180, 40, 40), [(16, 4), (18, 4), (17, 24)])
+            pygame.draw.polygon(surface, (220, 60, 60), [(16, 4), (17, 12), (18, 4)])
+            pygame.draw.rect(surface, (100, 40, 40), (15, 24, 4, 4))
+
+        elif weapon_id == "soul_reaver":
+            # Purple soul energy
+            pygame.draw.circle(surface, (140, 80, 180, 150), center, 12)
+            pygame.draw.circle(surface, (180, 120, 220), center, 8)
+            pygame.draw.circle(surface, (220, 160, 255), center, 4)
+            # Wisps
+            for pos in [(10, 10), (22, 10), (10, 22), (22, 22)]:
+                pygame.draw.circle(surface, (200, 150, 255), pos, 2)
+
+        elif weapon_id == "bone_storm":
+            # White bones
+            pygame.draw.rect(surface, (240, 240, 230), (14, 10, 4, 12))
+            pygame.draw.rect(surface, (240, 240, 230), (10, 14, 12, 4))
+            pygame.draw.circle(surface, (220, 220, 210), (12, 12), 2)
+            pygame.draw.circle(surface, (220, 220, 210), (20, 20), 2)
+
+        elif weapon_id == "cursed_tome":
+            # Dark purple book
+            pygame.draw.rect(surface, (80, 40, 100), (10, 12, 12, 8))
+            pygame.draw.rect(surface, (120, 60, 140), (11, 13, 10, 6))
+            pygame.draw.line(surface, (200, 150, 220), (16, 14), (16, 18), 1)
+
+        elif weapon_id == "poison_dagger":
+            # Green poison dagger
+            pygame.draw.polygon(surface, (100, 200, 100), [(16, 8), (18, 8), (17, 20)])
+            pygame.draw.polygon(surface, (140, 255, 140), [(16, 8), (17, 14), (18, 8)])
+            pygame.draw.rect(surface, (80, 120, 60), (15, 20, 4, 4))
+            pygame.draw.circle(surface, (120, 255, 120), (17, 12), 2)
+
+        elif weapon_id == "void_lance":
+            # Dark void lance
+            pygame.draw.polygon(surface, (60, 40, 80), [(16, 4), (18, 4), (17, 24)])
+            pygame.draw.circle(surface, (100, 80, 140), (17, 14), 6)
+            pygame.draw.circle(surface, (140, 120, 180), (17, 14), 3)
+
+        elif weapon_id == "reapers_embrace":
+            # Dark scythe
+            pygame.draw.arc(surface, (40, 40, 60), (6, 6, 20, 20), 0, 3.14, 5)
+            pygame.draw.line(surface, (30, 30, 50), (16, 16), (16, 28), 4)
+            pygame.draw.circle(surface, (100, 100, 120), (16, 10), 3)
+
+        elif weapon_id == "cosmic_annihilation":
+            # Cosmic purple/blue
+            pygame.draw.circle(surface, (100, 80, 180), center, 14)
+            pygame.draw.circle(surface, (140, 120, 220), center, 10)
+            pygame.draw.circle(surface, (180, 160, 255), center, 6)
+            pygame.draw.circle(surface, (255, 255, 255), center, 2)
+
+        elif weapon_id == "sacred_ward":
+            # Golden protection
+            pygame.draw.circle(surface, (255, 215, 0), center, 13, 4)
+            pygame.draw.circle(surface, (255, 235, 100), center, 9, 3)
+            pygame.draw.circle(surface, (255, 255, 200), center, 5)
+
+        elif weapon_id == "storm_bringer":
+            # Lightning storm
+            pygame.draw.circle(surface, (100, 100, 200, 100), center, 13)
+            bolt_1 = [(12, 8), (14, 12), (12, 16), (14, 20)]
+            bolt_2 = [(20, 8), (18, 12), (20, 16), (18, 20)]
+            pygame.draw.lines(surface, (255, 255, 150), False, bolt_1, 2)
+            pygame.draw.lines(surface, (255, 255, 150), False, bolt_2, 2)
+
+        elif weapon_id == "absolute_zero":
+            # Ice blue
+            pygame.draw.circle(surface, (180, 220, 255), center, 12)
+            pygame.draw.circle(surface, (220, 240, 255), center, 8)
+            pygame.draw.circle(surface, (255, 255, 255), center, 4)
+            # Ice crystals
+            for angle in [0, 90, 180, 270]:
+                import math
+                x = int(center[0] + 9 * math.cos(math.radians(angle)))
+                y = int(center[1] + 9 * math.sin(math.radians(angle)))
+                pygame.draw.line(surface, (200, 230, 255), (x-2, y), (x+2, y), 2)
+                pygame.draw.line(surface, (200, 230, 255), (x, y-2), (x, y+2), 2)
+
+        else:
+            # Fallback: magenta placeholder
+            pygame.draw.rect(surface, (255, 0, 255), (4, 4, size-8, size-8))
+            pygame.draw.line(surface, (0, 0, 0), (4, 4), (size-4, size-4), 2)
+            pygame.draw.line(surface, (0, 0, 0), (size-4, 4), (4, size-4), 2)
+
+        return surface
+
     def create_procedural_sprite(self, sprite_type: str, size: int = 32) -> pygame.Surface:
         """Create procedural sprites for entities (temporary until real assets)"""
         surface = pygame.Surface((size, size), pygame.SRCALPHA)
@@ -261,6 +480,22 @@ class AssetManager:
                 print(f"⚠️  Failed to load {key}: {e}")
 
         print(f"✅ Loaded {loaded_count}/{len(sprite_map)} sprites")
+
+        # Pre-generate weapon icons (Sprint 28-29: ALL 18 weapons)
+        weapon_ids = [
+            # Sprint 28 originals
+            'arcane_seeker', 'blood_whip', 'lightning_orb', 'toxic_cloud', 'holy_barrier',
+            # Sprint 29: All remaining weapons
+            'sword', 'magic_missile', 'lightning', 'holy_water', 'garlic',
+            'shadow_scythe', 'frost_nova', 'blood_lance', 'soul_reaver', 'bone_storm',
+            'cursed_tome', 'poison_dagger', 'void_lance', 'reapers_embrace', 'cosmic_annihilation',
+            'sacred_ward', 'storm_bringer', 'absolute_zero'
+        ]
+        print(f"🎨 Generating {len(weapon_ids)} weapon icons...")
+        for weapon_id in weapon_ids:
+            icon = self.create_weapon_icon(weapon_id, 32)
+            self.sprites[f'weapon_{weapon_id}'] = icon
+        print(f"✅ Generated {len(weapon_ids)} weapon icons")
 
     def get_sprite(self, key: str) -> Optional[pygame.Surface]:
         """Get a cached sprite by key"""

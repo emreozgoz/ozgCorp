@@ -401,7 +401,7 @@ class DarkSanctum:
         GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
 
         instructions = [
-            "← → to select difficulty",
+            "LEFT/RIGHT to select difficulty",
             "Press SPACE to Continue"
         ]
 
@@ -413,12 +413,15 @@ class DarkSanctum:
             y_offset += 30
 
         # Credits
-        credit = self.small_font.render("Created by Matrix AI Team", True, GOTHIC_MIST)
+        credit = self.small_font.render("Created by Emre ÖZGÖZ", True, GOTHIC_MIST)
         credit_rect = credit.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30))
         self.screen.blit(credit, credit_rect)
 
     def _render_class_select(self):
-        """Render character class selection screen with Gothic UI (Sprint 24)"""
+        """Render character class selection screen with Gothic UI (Sprint 24)
+
+        Sprint 29: Carousel system - show only 3 classes at a time
+        """
         self.screen.fill(GOTHIC_BLACK)
 
         # Draw ornate border
@@ -427,18 +430,29 @@ class DarkSanctum:
         # Title with Gothic header
         GothicHeader.draw(self.screen, "SELECT CHARACTER", 60, self.title_font, GOTHIC_GOLD, decoration=True)
 
-        # Display all classes
-        class_width = 300
-        class_spacing = 50
-        total_width = len(ALL_CLASSES) * class_width + (len(ALL_CLASSES) - 1) * class_spacing
+        # Sprint 29: Carousel - show 3 classes at a time (left, center, right)
+        # Calculate visible classes based on selected index
+        visible_count = 3
+        class_width = 320
+        class_spacing = 60
+        total_width = visible_count * class_width + (visible_count - 1) * class_spacing
         start_x = (WINDOW_WIDTH - total_width) // 2
 
-        for i, char_class in enumerate(ALL_CLASSES):
-            x = start_x + i * (class_width + class_spacing)
+        # Determine which classes to show (wrap around)
+        total_classes = len(ALL_CLASSES)
+        left_index = (self.selected_class_index - 1) % total_classes
+        center_index = self.selected_class_index
+        right_index = (self.selected_class_index + 1) % total_classes
+
+        visible_indices = [left_index, center_index, right_index]
+
+        for display_pos, class_index in enumerate(visible_indices):
+            char_class = ALL_CLASSES[class_index]
+            x = start_x + display_pos * (class_width + class_spacing)
             y = 140
 
-            # Highlight selected class
-            is_selected = (i == self.selected_class_index)
+            # Highlight selected class (center one)
+            is_selected = (display_pos == 1)  # Center position is always selected
 
             # Gothic class panel
             box_color = char_class.color if is_selected else GOTHIC_SHADOW
@@ -480,11 +494,41 @@ class DarkSanctum:
                 self.screen.blit(desc_surf, desc_rect)
                 desc_y += 25
 
+        # Sprint 29: Navigation arrows (large visual indicators)
+        arrow_y = y + 200  # Middle of the character cards
+        arrow_size = 50
+
+        # Left arrow (always show - carousel wraps)
+        left_arrow_x = start_x - 100
+        left_points = [
+            (left_arrow_x, arrow_y),                        # Left point
+            (left_arrow_x + arrow_size, arrow_y - arrow_size // 2),  # Top
+            (left_arrow_x + arrow_size, arrow_y + arrow_size // 2)   # Bottom
+        ]
+        pygame.draw.polygon(self.screen, GOTHIC_GOLD, left_points)
+        pygame.draw.polygon(self.screen, GOTHIC_BONE, left_points, 4)  # Border
+
+        # Right arrow (always show - carousel wraps)
+        right_arrow_x = start_x + total_width + 50
+        right_points = [
+            (right_arrow_x + arrow_size, arrow_y),          # Right point
+            (right_arrow_x, arrow_y - arrow_size // 2),     # Top
+            (right_arrow_x, arrow_y + arrow_size // 2)      # Bottom
+        ]
+        pygame.draw.polygon(self.screen, GOTHIC_GOLD, right_points)
+        pygame.draw.polygon(self.screen, GOTHIC_BONE, right_points, 4)  # Border
+
+        # Class indicator (show which class is selected)
+        indicator_text = f"{center_index + 1} / {total_classes}"
+        indicator_surf = self.medium_font.render(indicator_text, True, GOTHIC_GOLD)
+        indicator_rect = indicator_surf.get_rect(center=(WINDOW_WIDTH // 2, 110))
+        self.screen.blit(indicator_surf, indicator_rect)
+
         # Instructions panel
         inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 350, WINDOW_HEIGHT - 90, 700, 60)
         GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
 
-        inst_text = "← → to Select | SPACE to Confirm | ESC to Back"
+        inst_text = "LEFT/RIGHT to Select | SPACE to Confirm | ESC to Back"
         inst_surf = self.medium_font.render(inst_text, True, GOTHIC_SILVER)
         inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 60))
         self.screen.blit(inst_surf, inst_rect)
@@ -782,8 +826,8 @@ class DarkSanctum:
         # Gothic title
         GothicHeader.draw(self.screen, "LEVEL UP!", 60, self.large_font, GOTHIC_GOLD, decoration=True)
 
-        # Instructions
-        inst = self.small_font.render("← → to Select | SPACE to Choose", True, GOTHIC_SILVER)
+        # Instructions (Sprint 28: Replace arrow emojis with text)
+        inst = self.small_font.render("LEFT/RIGHT to Select | SPACE to Choose", True, GOTHIC_SILVER)
         inst_rect = inst.get_rect(center=(WINDOW_WIDTH // 2, 115))
         self.screen.blit(inst, inst_rect)
 
@@ -824,10 +868,19 @@ class DarkSanctum:
                 evo_rect = evo_banner.get_rect(center=(x + card_width // 2, start_y + 30))
                 self.screen.blit(evo_banner, evo_rect)
 
-                # Evolved icon
-                icon_surf = self.title_font.render(evolution_data.evolved_icon, True, GOTHIC_BONE)
-                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
-                self.screen.blit(icon_surf, icon_rect)
+                # Evolved icon (Sprint 28: Pixel art sprite)
+                from src.core.asset_manager import asset_manager
+                weapon_icon = asset_manager.get_sprite(f'weapon_{choice["weapon_id"]}')
+                if weapon_icon:
+                    # Scale up 2x for better visibility (32x32 → 64x64)
+                    scaled_icon = pygame.transform.scale(weapon_icon, (64, 64))
+                    icon_rect = scaled_icon.get_rect(center=(x + card_width // 2, start_y + 80))
+                    self.screen.blit(scaled_icon, icon_rect)
+                else:
+                    # Fallback: emoji (if sprite not found)
+                    icon_surf = self.title_font.render(evolution_data.evolved_icon, True, GOTHIC_BONE)
+                    icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
+                    self.screen.blit(icon_surf, icon_rect)
 
                 # Evolved name
                 name_surf = self.medium_font.render(evolution_data.evolved_name, True, GOTHIC_GOLD)
@@ -874,10 +927,23 @@ class DarkSanctum:
                 card_rect = pygame.Rect(x, start_y, card_width, card_height)
                 GothicPanel.draw(self.screen, card_rect, card_color, border_color, border_width)
 
-                # Weapon icon (large emoji)
-                icon_surf = self.title_font.render(weapon_data.icon, True, GOTHIC_BONE)
-                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
-                self.screen.blit(icon_surf, icon_rect)
+                # Weapon icon (Sprint 28: Pixel art sprite instead of emoji)
+                from src.core.asset_manager import asset_manager
+                weapon_icon = asset_manager.get_sprite(f'weapon_{choice["weapon_id"]}')
+                if weapon_icon:
+                    # Scale up 2x for better visibility (32x32 → 64x64)
+                    scaled_icon = pygame.transform.scale(weapon_icon, (64, 64))
+                    icon_rect = scaled_icon.get_rect(center=(x + card_width // 2, start_y + 60))
+                    self.screen.blit(scaled_icon, icon_rect)
+                    # Debug: print to console (Sprint 29)
+                    print(f"✅ Rendered weapon icon: {choice['weapon_id']} at ({icon_rect.centerx}, {icon_rect.centery})")
+                else:
+                    # Fallback: emoji (if sprite not found)
+                    icon_surf = self.title_font.render(weapon_data.icon, True, GOTHIC_BONE)
+                    icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
+                    self.screen.blit(icon_surf, icon_rect)
+                    # Debug: print warning (Sprint 29)
+                    print(f"⚠️ Weapon icon NOT FOUND: {choice['weapon_id']}, using emoji fallback")
 
                 # Weapon name
                 name_color = GOTHIC_BONE if is_selected else GOTHIC_SILVER
@@ -923,13 +989,41 @@ class DarkSanctum:
                     self.screen.blit(desc_surf, desc_rect)
                     desc_y += 20
 
+        # Sprint 28: Visual arrow indicators (pixel art triangles)
+        arrow_y = start_y + card_height // 2
+        arrow_size = 40
+
+        # Left arrow (if not first card)
+        if self.selected_choice_index > 0:
+            # Draw left-pointing triangle
+            left_arrow_x = start_x - 80
+            left_points = [
+                (left_arrow_x, arrow_y),                        # Left point
+                (left_arrow_x + arrow_size, arrow_y - arrow_size // 2),  # Top
+                (left_arrow_x + arrow_size, arrow_y + arrow_size // 2)   # Bottom
+            ]
+            pygame.draw.polygon(self.screen, GOTHIC_GOLD, left_points)
+            pygame.draw.polygon(self.screen, GOTHIC_BONE, left_points, 3)  # Border
+
+        # Right arrow (if not last card)
+        if self.selected_choice_index < len(self.level_up_choices) - 1:
+            # Draw right-pointing triangle
+            right_arrow_x = start_x + (len(self.level_up_choices) * (card_width + card_spacing)) - card_spacing + 40
+            right_points = [
+                (right_arrow_x + arrow_size, arrow_y),          # Right point
+                (right_arrow_x, arrow_y - arrow_size // 2),     # Top
+                (right_arrow_x, arrow_y + arrow_size // 2)      # Bottom
+            ]
+            pygame.draw.polygon(self.screen, GOTHIC_GOLD, right_points)
+            pygame.draw.polygon(self.screen, GOTHIC_BONE, right_points, 3)  # Border
+
 
 def main():
     """Entry point"""
     print("\n" + "=" * 70)
     print("🌙 DARK SANCTUM 🌙")
     print("=" * 70)
-    print("A tactical survival game by Matrix AI Team")
+    print("A tactical survival game by Emre ÖZGÖZ")
     print("Inspired by Vampire Survivors with unique mechanics")
     print("=" * 70 + "\n")
 
