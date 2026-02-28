@@ -29,8 +29,8 @@ class RenderSystem(System):
         # Get screen shake offset
         camera_offset = self._get_camera_offset()
 
-        # Clear screen with dark background
-        self.screen.fill(COLOR_BACKGROUND)
+        # Background is now handled by BackgroundSystem (priority 1) - Sprint 25
+        # No need to fill screen here
 
         # Render all sprites (with camera offset)
         self._render_sprites(camera_offset)
