@@ -436,7 +436,56 @@ class EnvironmentalHazard(Component):
         self.active_timer = 0.0  # Spike trap timing
 
 
+# === SPRITE & ANIMATION COMPONENTS (Sprint 21) ===
+
+class SpriteComponent(Component):
+    """Sprite-based visual representation"""
+
+    def __init__(self, sprite_key: str, size: int = 32):
+        self.sprite_key = sprite_key  # Key for AssetManager lookup
+        self.size = size
+        self.flip_x = False
+        self.flip_y = False
+        self.alpha = 255  # 0-255 transparency
+        self.rotation = 0.0  # Rotation angle in degrees
+
+class AnimationComponent(Component):
+    """Animation state and control"""
+
+    def __init__(self, animation_name: str = "idle", frame_duration: float = 0.1):
+        self.current_animation = animation_name
+        self.animations = {}  # Dict[str, List[pygame.Surface]]
+        self.current_frame = 0
+        self.frame_duration = frame_duration  # Seconds per frame
+        self.time_since_frame = 0.0
+        self.loop = True
+        self.playing = True
+
+    def add_animation(self, name: str, frames: list):
+        """Add animation frames"""
+        self.animations[name] = frames
+
+    def play(self, name: str, loop: bool = True):
+        """Start playing an animation"""
+        if name in self.animations and name != self.current_animation:
+            self.current_animation = name
+            self.current_frame = 0
+            self.time_since_frame = 0.0
+            self.loop = loop
+            self.playing = True
+
+    def get_current_frame(self):
+        """Get current animation frame"""
+        if self.current_animation in self.animations:
+            frames = self.animations[self.current_animation]
+            if frames:
+                return frames[self.current_frame]
+        return None
+
+
 # === GAME DESIGNER NOTE ===
 # Components are pure data - no logic
 # Logic lives in Systems
 # This separation keeps code clean and testable
+#
+# Sprint 21: Added sprite & animation components for visual enhancement
