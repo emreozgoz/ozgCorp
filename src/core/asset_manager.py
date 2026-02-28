@@ -71,6 +71,9 @@ class AssetManager:
         os.makedirs(self.sprites_dir, exist_ok=True)
         os.makedirs(self.fonts_dir, exist_ok=True)
 
+        # Pre-load all game sprites (Sprint 26)
+        self._preload_sprites()
+
     def load_sprite(self, path: str, key: Optional[str] = None) -> pygame.Surface:
         """Load and cache a single sprite"""
         cache_key = key or path
@@ -214,6 +217,45 @@ class AssetManager:
             pygame.draw.circle(surface, (255, 0, 255), (size // 2, size // 2), size // 2)
 
         return surface
+
+    def _preload_sprites(self):
+        """Pre-load all game sprites (Sprint 26)"""
+        sprite_map = {
+            # Characters
+            'shadow_knight': 'characters/shadow_knight.png',
+            'blood_mage': 'characters/blood_mage.png',
+            'void_guardian': 'characters/void_guardian.png',
+            'necromancer': 'characters/necromancer.png',
+            'tempest_ranger': 'characters/tempest_ranger.png',
+
+            # Enemies
+            'enemy_basic': 'enemies/basic.png',
+            'enemy_imp': 'enemies/imp.png',
+            'enemy_golem': 'enemies/golem.png',
+            'enemy_wraith': 'enemies/wraith.png',
+
+            # Bosses
+            'boss_blood_titan': 'bosses/blood_titan.png',
+            'boss_void_reaver': 'bosses/void_reaver.png',
+            'boss_frost_colossus': 'bosses/frost_colossus.png',
+            'boss_plague_herald': 'bosses/plague_herald.png',
+            'boss_inferno_lord': 'bosses/inferno_lord.png',
+        }
+
+        print("🎨 Loading sprites...")
+        loaded_count = 0
+        for key, path in sprite_map.items():
+            try:
+                self.load_sprite(path, key)
+                loaded_count += 1
+            except Exception as e:
+                print(f"⚠️  Failed to load {key}: {e}")
+
+        print(f"✅ Loaded {loaded_count}/{len(sprite_map)} sprites")
+
+    def get_sprite(self, key: str) -> Optional[pygame.Surface]:
+        """Get a cached sprite by key"""
+        return self.sprites.get(key)
 
     def clear_cache(self):
         """Clear all cached assets"""

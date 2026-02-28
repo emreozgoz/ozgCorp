@@ -25,11 +25,21 @@ class EntityFactory:
         # Get difficulty multipliers
         multipliers = DifficultySettings.get_multipliers()
 
+        # Map character class to sprite_key
+        sprite_key_map = {
+            "Shadow Knight": "shadow_knight",
+            "Blood Mage": "blood_mage",
+            "Void Guardian": "void_guardian",
+            "Necromancer": "necromancer",
+            "Tempest Ranger": "tempest_ranger"
+        }
+        sprite_key = sprite_key_map.get(character_class.name, "shadow_knight")
+
         # Core components (use class stats with difficulty multipliers)
         player.add_component(Position(x, y))
         player.add_component(Velocity(0, 0))
         player.add_component(Size(PLAYER_SIZE, PLAYER_SIZE))
-        player.add_component(Sprite(character_class.color, radius=PLAYER_SIZE / 2))
+        player.add_component(Sprite(character_class.color, radius=PLAYER_SIZE / 2, sprite_key=sprite_key))
 
         # Combat components (apply difficulty multipliers)
         player.add_component(Health(character_class.health * multipliers['player_health']))
@@ -81,7 +91,7 @@ class EntityFactory:
 
             # Elite enemies have golden color, regular enemies normal color
             color = (255, 215, 0) if is_elite else ENEMY_COLOR
-            enemy.add_component(Sprite(color, radius=ENEMY_SIZE / 2))
+            enemy.add_component(Sprite(color, radius=ENEMY_SIZE / 2, sprite_key='enemy_basic'))
 
             # Combat components (apply difficulty + elite multipliers)
             elite_health_mult = 2.0 if is_elite else 1.0
@@ -120,7 +130,7 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2, sprite_key='enemy_imp'))
         enemy.add_component(Health(ENEMY_BASE_HEALTH * FAST_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * FAST_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))
@@ -148,7 +158,7 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2, sprite_key='enemy_golem'))
         enemy.add_component(Health(ENEMY_BASE_HEALTH * TANK_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * TANK_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))
@@ -176,7 +186,7 @@ class EntityFactory:
         enemy.add_component(Position(x, y))
         enemy.add_component(Velocity(0, 0))
         enemy.add_component(Size(size, size))
-        enemy.add_component(Sprite(color, radius=size / 2))
+        enemy.add_component(Sprite(color, radius=size / 2, sprite_key='enemy_wraith'))
         enemy.add_component(Health(ENEMY_BASE_HEALTH * RANGED_ENEMY_HEALTH_MULT * health_multiplier * multipliers['enemy_health'] * elite_health_mult))
         enemy.add_component(Damage(ENEMY_BASE_DAMAGE * RANGED_ENEMY_DAMAGE_MULT * multipliers['enemy_damage'] * elite_damage_mult))
         enemy.add_component(Team("enemy"))
