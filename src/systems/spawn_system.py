@@ -135,7 +135,7 @@ class WaveSpawnSystem(System):
         boss.add_component(Position(x, y))
         boss.add_component(Velocity(0, 0))
         boss.add_component(Size(boss_size, boss_size))
-        boss.add_component(Sprite(boss_data.color, radius=boss_size / 2, glow_color=boss_data.glow_color, sprite_key=sprite_key))
+        boss.add_component(Sprite(boss_data.color, radius=boss_size / 2, sprite_key=sprite_key))
         boss.add_component(Health(ENEMY_BASE_HEALTH * boss_data.health_multiplier))
         boss.add_component(Damage(ENEMY_BASE_DAMAGE * boss_data.damage_multiplier))
         boss.add_component(Team("enemy"))
