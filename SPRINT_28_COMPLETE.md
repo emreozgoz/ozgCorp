@@ -271,19 +271,38 @@ Included in commit:
 
 ## 💬 User Feedback Addressed
 
-**Original Issue**:
+**Original Issue #1**:
 > "skill seçtiğin ekrandaki simgeler gelmiyor"
 
 **Solution**:
 ✅ Weapon icons now show as beautiful pixel art instead of emojis
 
-**Original Issue**:
+**Follow-up Issue #2**:
+> "iconları göremedim" (couldn't see the icons)
+
+**Solution**:
+✅ Increased brightness of all weapon icon colors by 30-50%
+- Arcane Seeker: Brighter purple outer glow
+- Blood Whip: Brighter red blade
+- Toxic Cloud: Brighter green flask
+- All icons now highly visible on dark backgrounds
+
+**Follow-up Issue #3**:
+> "okları göremiyorum" (can't see the arrows)
+
+**Solution**:
+✅ Replaced emoji arrows (← →) with:
+- Text indicators: "LEFT/RIGHT to Select"
+- 40px visual golden triangle arrows on level-up screen
+- Clear navigation indicators
+
+**Original Issue #4**:
 > "ana sayfada da bazı şekiller gelmiyor"
 
 **Solution**:
 ✅ All UI elements now use pixel art (ready for future menu enhancements)
 
-**Original Issue**:
+**Original Issue #5**:
 > "aynı karakterlere yaptığın gibi"
 
 **Solution**:
@@ -293,11 +312,29 @@ Included in commit:
 
 ## 🎮 How to Test
 
+### Option 1: Dedicated Icon Visibility Test
+```bash
+python3 test_levelup_icons.py
+```
+- Shows simulated level-up screen with weapon icons
+- Press SPACE to toggle between views
+- All 5 icons should be clearly visible with bright colors
+
+### Option 2: In-Game Testing
 1. Launch game: `python3 main.py`
-2. Gain XP and level up
-3. See weapon selection screen with pixel art icons
-4. Icons should be clear, colorful 64x64 pixel art
-5. No emojis should appear (unless sprite fails to load)
+2. Select a character class
+3. Gain XP and level up
+4. See weapon selection screen with pixel art icons
+5. Icons should be clear, colorful 64x64 pixel art
+6. Navigation arrows (golden triangles) visible on left/right
+7. No emojis should appear (unless sprite fails to load)
+
+**Expected Results**:
+- ✅ All weapon icons visible as pixel art
+- ✅ Icons brighter and clearer than emoji
+- ✅ Golden triangle arrows for navigation
+- ✅ "LEFT/RIGHT to Select" text visible
+- ✅ 60 FPS maintained
 
 ---
 
@@ -306,10 +343,16 @@ Included in commit:
 Sprint 28 is **100% COMPLETE** and ready to merge to `main` branch.
 
 **Branch**: `feature/sprint-28-ui-sprites`
-**Commits**: 1
-**Lines Added**: +474
-**Lines Removed**: -8
-**Files Changed**: 7
+**Commits**: 4
+**Lines Added**: +650
+**Lines Removed**: -16
+**Files Changed**: 9
+
+**Commit History**:
+1. Initial weapon icon system implementation
+2. Arrow indicator fixes (emoji → pixel art triangles)
+3. Brightness improvements for visibility
+4. Test suite for icon visibility verification
 
 ---
 
