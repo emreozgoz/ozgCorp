@@ -75,12 +75,45 @@ GARLIC_EVOLUTION = EvolutionData(
     special_effect="immunity"  # Player immune while in aura
 )
 
+# === SPRINT 14 EVOLUTIONS ===
+
+LIGHTNING_EVOLUTION = EvolutionData(
+    base_weapon_id="lightning",
+    evolved_id="storm_bringer",
+    evolved_name="Storm Bringer",
+    evolved_description="Apocalyptic lightning storm that chains infinitely",
+    evolved_icon="⚡",
+    damage_multiplier=2.8,  # 90 → 252 damage
+    cooldown_multiplier=0.4,  # 1.5s → 0.6s (extremely fast)
+    range_multiplier=2.0,  # 400 → 800 range
+    projectile_multiplier=3,  # 2 → 5 simultaneous chains
+    evolved_color=(255, 255, 50),  # Bright electric yellow
+    special_effect="infinite_chain"  # Chains never stop (within range)
+)
+
+FROST_NOVA_EVOLUTION = EvolutionData(
+    base_weapon_id="frost_nova",
+    evolved_id="absolute_zero",
+    evolved_name="Absolute Zero",
+    evolved_description="Freezing blizzard that completely stops enemies in their tracks",
+    evolved_icon="❄️",
+    damage_multiplier=3.2,  # 50 → 160 damage
+    cooldown_multiplier=0.5,  # 1.4s → 0.7s
+    range_multiplier=1.8,  # 500 → 900 range
+    projectile_multiplier=5,  # 5 → 10 projectiles
+    evolved_color=(150, 230, 255),  # Bright ice blue
+    special_effect="freeze"  # Enemies frozen for 2s on hit
+)
+
 
 # Evolution registry
 WEAPON_EVOLUTIONS = {
     "sword": SWORD_EVOLUTION,
     "magic_missile": MAGIC_MISSILE_EVOLUTION,
     "garlic": GARLIC_EVOLUTION,
+    # Sprint 14 evolutions
+    "lightning": LIGHTNING_EVOLUTION,
+    "frost_nova": FROST_NOVA_EVOLUTION,
 }
 
 
@@ -96,8 +129,15 @@ def can_evolve(weapon_id: str) -> bool:
 
 # === GAME DESIGNER NOTE ===
 # Weapon evolutions are the "endgame" power fantasy:
-# - Reaper's Embrace: Melee DPS king, sustain through lifesteal
-# - Cosmic Annihilation: Screen-clearing ranged destruction
-# - Sacred Ward: Tank build enabler with immunity
-# Each evolution fundamentally changes playstyle!
-# Sprint 12: 3 initial evolutions (can expand later)
+#
+# SPRINT 12 EVOLUTIONS (3):
+# - Reaper's Embrace (Sword): Melee DPS king, sustain through lifesteal
+# - Cosmic Annihilation (Magic Missile): Screen-clearing ranged destruction
+# - Sacred Ward (Garlic): Tank build enabler with immunity
+#
+# SPRINT 14 EVOLUTIONS (2):
+# - Storm Bringer (Lightning): Infinite chain lightning, ultimate crowd control
+# - Absolute Zero (Frost Nova): Freezing blizzard, complete enemy lockdown
+#
+# Total: 5 evolutions (out of 13 base weapons)
+# Each evolution fundamentally changes playstyle and enables new builds!

@@ -234,7 +234,8 @@ class LevelUpChoiceSystem(System):
         available = []
         for weapon_data in ALL_WEAPONS:
             # Skip evolved weapon forms (they're only accessible via evolution)
-            if weapon_data.id in ['reapers_embrace', 'cosmic_annihilation', 'sacred_ward']:
+            if weapon_data.id in ['reapers_embrace', 'cosmic_annihilation', 'sacred_ward',
+                                  'storm_bringer', 'absolute_zero']:
                 continue
 
             current_level = inventory.get_level(weapon_data.id)

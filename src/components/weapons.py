@@ -147,6 +147,78 @@ BLOOD_LANCE = WeaponData(
     color=(200, 30, 30)  # Blood red
 )
 
+# === NEW WEAPONS (Sprint 14) ===
+
+SOUL_REAVER = WeaponData(
+    id="soul_reaver",
+    name="Soul Reaver",
+    description="Dark energy beams that drain life from enemies",
+    icon="👻",
+    max_level=5,
+    damage_per_level=[14, 22, 34, 50, 72],
+    cooldown_per_level=[2.2, 2.0, 1.8, 1.5, 1.2],
+    range_per_level=[300, 350, 400, 450, 500],
+    projectile_count_per_level=[1, 2, 2, 3, 4],
+    weapon_type="projectile",
+    color=(140, 70, 200)  # Dark purple
+)
+
+BONE_STORM = WeaponData(
+    id="bone_storm",
+    name="Bone Storm",
+    description="Whirling bones orbit rapidly around you",
+    icon="🦴",
+    max_level=5,
+    damage_per_level=[10, 16, 24, 35, 52],
+    cooldown_per_level=[0.8, 0.75, 0.7, 0.6, 0.5],  # Very fast attacks
+    range_per_level=[90, 110, 130, 150, 180],
+    projectile_count_per_level=[2, 3, 4, 5, 6],  # Many orbiting bones
+    weapon_type="melee",
+    color=(220, 220, 200)  # Bone white
+)
+
+CURSED_TOME = WeaponData(
+    id="cursed_tome",
+    name="Cursed Tome",
+    description="Summons dark sigils that explode on contact",
+    icon="📖",
+    max_level=5,
+    damage_per_level=[22, 35, 52, 75, 110],
+    cooldown_per_level=[3.5, 3.2, 2.8, 2.4, 2.0],
+    range_per_level=[250, 300, 350, 400, 450],
+    projectile_count_per_level=[1, 1, 2, 2, 3],  # Sigil count
+    weapon_type="special",
+    color=(80, 40, 100)  # Dark violet
+)
+
+POISON_DAGGER = WeaponData(
+    id="poison_dagger",
+    name="Venom Fang",
+    description="Rapid poison daggers that deal damage over time",
+    icon="🗡️",
+    max_level=5,
+    damage_per_level=[8, 13, 20, 30, 45],  # Low per hit, but DoT
+    cooldown_per_level=[0.6, 0.55, 0.5, 0.4, 0.3],  # Very rapid fire
+    range_per_level=[200, 230, 260, 300, 350],
+    projectile_count_per_level=[1, 2, 2, 3, 4],
+    weapon_type="projectile",
+    color=(80, 200, 80)  # Toxic green
+)
+
+VOID_LANCE = WeaponData(
+    id="void_lance",
+    name="Void Lance",
+    description="Massive slow projectile that pierces everything",
+    icon="🌑",
+    max_level=5,
+    damage_per_level=[35, 55, 80, 115, 165],  # High damage
+    cooldown_per_level=[4.0, 3.7, 3.4, 3.0, 2.5],  # Slow but powerful
+    range_per_level=[600, 650, 700, 800, 900],  # Long range
+    projectile_count_per_level=[1, 1, 1, 2, 2],  # Few but strong
+    weapon_type="projectile",
+    color=(40, 40, 80)  # Void dark
+)
+
 # === EVOLVED WEAPONS (Sprint 12) ===
 
 REAPERS_EMBRACE = WeaponData(
@@ -191,10 +263,41 @@ SACRED_WARD = WeaponData(
     color=(255, 255, 200)  # Bright golden
 )
 
+# === SPRINT 14 EVOLVED WEAPONS ===
+
+STORM_BRINGER = WeaponData(
+    id="storm_bringer",
+    name="Storm Bringer",
+    description="⚡ EVOLVED: Infinite chain lightning storm",
+    icon="⚡",
+    max_level=1,
+    damage_per_level=[252],  # 2.8x base (90 * 2.8)
+    cooldown_per_level=[0.6],  # 0.4x base (1.5 * 0.4)
+    range_per_level=[800],  # 2x base (400 * 2)
+    projectile_count_per_level=[5],  # 2 + 3
+    weapon_type="special",
+    color=(255, 255, 50)  # Bright electric yellow
+)
+
+ABSOLUTE_ZERO = WeaponData(
+    id="absolute_zero",
+    name="Absolute Zero",
+    description="❄️ EVOLVED: Freezing blizzard obliteration",
+    icon="❄️",
+    max_level=1,
+    damage_per_level=[160],  # 3.2x base (50 * 3.2)
+    cooldown_per_level=[0.7],  # 0.5x base (1.4 * 0.5)
+    range_per_level=[900],  # 1.8x base (500 * 1.8)
+    projectile_count_per_level=[10],  # 5 + 5
+    weapon_type="projectile",
+    color=(150, 230, 255)  # Bright ice blue
+)
+
 # All available weapons
 ALL_WEAPONS = [SWORD, MAGIC_MISSILE, LIGHTNING_CHAIN, HOLY_WATER, GARLIC,
                SHADOW_SCYTHE, FROST_NOVA, BLOOD_LANCE,
-               REAPERS_EMBRACE, COSMIC_ANNIHILATION, SACRED_WARD]
+               SOUL_REAVER, BONE_STORM, CURSED_TOME, POISON_DAGGER, VOID_LANCE,
+               REAPERS_EMBRACE, COSMIC_ANNIHILATION, SACRED_WARD, STORM_BRINGER, ABSOLUTE_ZERO]
 
 # Weapon pool for level up choices
 WEAPON_POOL = {
@@ -206,10 +309,19 @@ WEAPON_POOL = {
     "shadow_scythe": SHADOW_SCYTHE,
     "frost_nova": FROST_NOVA,
     "blood_lance": BLOOD_LANCE,
+    # Sprint 14 weapons
+    "soul_reaver": SOUL_REAVER,
+    "bone_storm": BONE_STORM,
+    "cursed_tome": CURSED_TOME,
+    "poison_dagger": POISON_DAGGER,
+    "void_lance": VOID_LANCE,
     # Evolved weapons (only accessible via evolution)
     "reapers_embrace": REAPERS_EMBRACE,
     "cosmic_annihilation": COSMIC_ANNIHILATION,
-    "sacred_ward": SACRED_WARD
+    "sacred_ward": SACRED_WARD,
+    # Sprint 14 evolved weapons
+    "storm_bringer": STORM_BRINGER,
+    "absolute_zero": ABSOLUTE_ZERO
 }
 
 
@@ -220,6 +332,8 @@ def get_weapon_by_id(weapon_id: str) -> Optional[WeaponData]:
 
 # === GAME DESIGNER NOTE ===
 # Weapon progression creates build variety:
+#
+# ORIGINAL 8 WEAPONS:
 # - Sword: Close-range orbital defense
 # - Magic Missile: Reliable homing damage
 # - Lightning: Crowd control for groups
@@ -228,5 +342,14 @@ def get_weapon_by_id(weapon_id: str) -> Optional[WeaponData]:
 # - Shadow Scythe: High damage melee, slower but devastating
 # - Frost Nova: Crowd control with slow effect
 # - Blood Lance: Piercing projectiles for grouped enemies
+#
+# SPRINT 14 - NEW WEAPONS (5):
+# - Soul Reaver: Life-drain projectiles (synergizes with Necromancer)
+# - Bone Storm: Very fast orbiting melee (high DPS, close range)
+# - Cursed Tome: Explosive sigils (high damage, slow cooldown)
+# - Poison Dagger: Rapid-fire DoT projectiles (synergizes with Tempest Ranger)
+# - Void Lance: Slow, massive piercing projectiles (sniper weapon)
+#
+# Total: 13 base weapons + 5 evolved = 18 total weapons
+# Sprint 14: Now 18 total weapons (13 base + 5 evolutions)
 # Each weapon has meaningful upgrades at each level
-# Sprint 11: Added 3 new weapons (Total: 8 weapons)
