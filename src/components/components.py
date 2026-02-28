@@ -37,11 +37,12 @@ class Size(Component):
 
 
 class Sprite(Component):
-    """Visual representation"""
+    """Visual representation (Sprint 26: Now supports sprite images!)"""
 
-    def __init__(self, color: tuple, radius: Optional[float] = None):
+    def __init__(self, color: tuple, radius: Optional[float] = None, sprite_key: Optional[str] = None):
         self.color = color
-        self.radius = radius  # If not None, draw as circle
+        self.radius = radius  # If not None, draw as circle (fallback)
+        self.sprite_key = sprite_key  # Sprite key for asset_manager lookup
 
 
 # === COMBAT COMPONENTS ===

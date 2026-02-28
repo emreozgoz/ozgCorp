@@ -9,6 +9,7 @@ import pygame
 from src.core.ecs import System
 from src.components.components import *
 from config.settings import *
+from src.core.asset_manager import asset_manager
 
 
 class RenderSystem(System):
@@ -59,7 +60,7 @@ class RenderSystem(System):
         return (0, 0)
 
     def _render_sprites(self, camera_offset: tuple[float, float] = (0, 0)):
-        """Render all entities with sprites"""
+        """Render all entities with sprites (Sprint 26: Real sprite images!)"""
         entities = self.get_entities(Position, Sprite, Size)
 
         for entity in entities:
@@ -74,40 +75,75 @@ class RenderSystem(System):
             # Check for hit flash
             from src.systems.screen_effects import HitFlash
             hit_flash = entity.get_component(HitFlash) if entity.has_component(HitFlash) else None
-            flash_color = (255, 255, 255) if (hit_flash and hit_flash.active) else sprite.color
 
             # Check if boss (render glow)
             enemy = entity.get_component(Enemy)
             is_boss = enemy and enemy.is_boss
 
-            if sprite.radius:
-                # Boss glow effect
-                if is_boss:
-                    # Outer glow
+            # Try to get sprite image from asset manager
+            sprite_image = None
+            if hasattr(sprite, 'sprite_key') and sprite.sprite_key:
+                sprite_image = asset_manager.get_sprite(sprite.sprite_key)
+
+            if sprite_image:
+                # RENDER SPRITE IMAGE (Sprint 26: No more circles!)
+                sprite_rect = sprite_image.get_rect(center=(render_x, render_y))
+
+                # Apply hit flash effect
+                if hit_flash and hit_flash.active:
+                    # Create white flash surface
+                    flash_surf = sprite_image.copy()
+                    flash_surf.fill((255, 255, 255, 180), special_flags=pygame.BLEND_RGB_ADD)
+                    self.screen.blit(flash_surf, sprite_rect)
+                else:
+                    # Boss glow effect
+                    if is_boss:
+                        # Render glow behind sprite
+                        glow_size = (int(sprite_rect.width * 1.3), int(sprite_rect.height * 1.3))
+                        glow_surf = pygame.Surface(glow_size, pygame.SRCALPHA)
+                        pygame.draw.circle(
+                            glow_surf,
+                            BOSS_GLOW_COLOR + (120,),
+                            (glow_size[0] // 2, glow_size[1] // 2),
+                            glow_size[0] // 2
+                        )
+                        glow_rect = glow_surf.get_rect(center=(render_x, render_y))
+                        self.screen.blit(glow_surf, glow_rect)
+
+                    # Render sprite
+                    self.screen.blit(sprite_image, sprite_rect)
+
+            else:
+                # FALLBACK: Old circle rendering (if sprite not found)
+                flash_color = (255, 255, 255) if (hit_flash and hit_flash.active) else sprite.color
+
+                if sprite.radius:
+                    # Boss glow effect
+                    if is_boss:
+                        pygame.draw.circle(
+                            self.screen,
+                            BOSS_GLOW_COLOR,
+                            (render_x, render_y),
+                            int(sprite.radius + 5),
+                            3
+                        )
+
+                    # Draw as circle (with hit flash)
                     pygame.draw.circle(
                         self.screen,
-                        BOSS_GLOW_COLOR,
+                        flash_color,
                         (render_x, render_y),
-                        int(sprite.radius + 5),
-                        3
+                        int(sprite.radius)
                     )
-
-                # Draw as circle (with hit flash)
-                pygame.draw.circle(
-                    self.screen,
-                    flash_color,
-                    (render_x, render_y),
-                    int(sprite.radius)
-                )
-            else:
-                # Draw as rectangle
-                rect = pygame.Rect(
-                    int(render_x - size.width / 2),
-                    int(render_y - size.height / 2),
-                    int(size.width),
-                    int(size.height)
-                )
-                pygame.draw.rect(self.screen, sprite.color, rect)
+                else:
+                    # Draw as rectangle
+                    rect = pygame.Rect(
+                        int(render_x - size.width / 2),
+                        int(render_y - size.height / 2),
+                        int(size.width),
+                        int(size.height)
+                    )
+                    pygame.draw.rect(self.screen, sprite.color, rect)
 
     def _render_health_bars(self, camera_offset: tuple[float, float] = (0, 0)):
         """Render health bars above entities"""
