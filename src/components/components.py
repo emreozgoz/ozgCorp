@@ -483,9 +483,88 @@ class AnimationComponent(Component):
         return None
 
 
+# === VFX COMPONENTS (Sprint 23) ===
+
+class TrailEffect(Component):
+    """Trail effect for projectiles and weapons"""
+
+    def __init__(self, color: tuple, length: int = 5, fade_speed: float = 0.1):
+        self.color = color
+        self.length = length  # Number of trail segments
+        self.fade_speed = fade_speed
+        self.positions = []  # List of (x, y, alpha) tuples
+
+    def add_position(self, x: float, y: float):
+        """Add new position to trail"""
+        self.positions.append([x, y, 255])
+        if len(self.positions) > self.length:
+            self.positions.pop(0)
+
+    def update(self, dt: float):
+        """Fade out trail segments"""
+        for pos in self.positions:
+            pos[2] = max(0, pos[2] - self.fade_speed * 255 * dt)
+
+
+class GlowEffect(Component):
+    """Pulsing glow effect"""
+
+    def __init__(self, color: tuple, intensity: float = 1.0, pulse_speed: float = 2.0):
+        self.color = color
+        self.intensity = intensity  # 0.0 to 1.0
+        self.pulse_speed = pulse_speed
+        self.time = 0.0
+
+    def update(self, dt: float):
+        """Update pulse animation"""
+        self.time += dt * self.pulse_speed
+
+    def get_current_intensity(self) -> float:
+        """Get pulsing intensity"""
+        import math
+        return self.intensity * (0.5 + 0.5 * math.sin(self.time))
+
+
+class ImpactEffect(Component):
+    """Hit impact visual effect"""
+
+    def __init__(self, effect_type: str = "spark", duration: float = 0.2):
+        self.effect_type = effect_type  # "spark", "explosion", "slash"
+        self.duration = duration
+        self.elapsed = 0.0
+        self.scale = 1.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        # Scale up then fade
+        if self.elapsed < self.duration * 0.3:
+            self.scale = 1.0 + (self.elapsed / (self.duration * 0.3)) * 0.5
+        return self.elapsed >= self.duration
+
+
+class ScreenDistortion(Component):
+    """Screen shake/distortion effect"""
+
+    def __init__(self, intensity: float, duration: float):
+        self.intensity = intensity
+        self.duration = duration
+        self.elapsed = 0.0
+
+    def update(self, dt: float) -> bool:
+        """Return True if expired"""
+        self.elapsed += dt
+        return self.elapsed >= self.duration
+
+    def get_current_intensity(self) -> float:
+        """Get decreasing intensity"""
+        return self.intensity * (1.0 - self.elapsed / self.duration)
+
+
 # === GAME DESIGNER NOTE ===
 # Components are pure data - no logic
 # Logic lives in Systems
 # This separation keeps code clean and testable
 #
 # Sprint 21: Added sprite & animation components for visual enhancement
+# Sprint 23: Added advanced VFX components (trails, glows, impacts, distortion)
