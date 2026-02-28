@@ -13,7 +13,10 @@
   "high_scores": [],
   "achievements_unlocked": [
     "first_blood",
-    "boss_slayer"
+    "boss_slayer",
+    "slayer",
+    "wave_warrior",
+    "power_collector"
   ],
   "first_played": null,
   "last_played": null

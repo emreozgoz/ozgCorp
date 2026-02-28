@@ -21,6 +21,12 @@ class AudioSystem(System):
         # Initialize pygame mixer
         pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
 
+        # Volume settings (0.0 to 1.0)
+        self.master_volume = 0.7
+        self.sfx_volume = 0.8
+        self.music_volume = 0.5
+        self.enabled = True  # Master enable/disable
+
         # Sound channels
         self.music_channel = None
         self.sfx_channels = []
@@ -32,6 +38,22 @@ class AudioSystem(System):
         self._generate_sounds()
 
         print("🔊 Audio System initialized")
+
+    def set_master_volume(self, volume: float):
+        """Set master volume (0.0 to 1.0)"""
+        self.master_volume = max(0.0, min(1.0, volume))
+
+    def set_sfx_volume(self, volume: float):
+        """Set SFX volume (0.0 to 1.0)"""
+        self.sfx_volume = max(0.0, min(1.0, volume))
+
+    def set_music_volume(self, volume: float):
+        """Set music volume (0.0 to 1.0)"""
+        self.music_volume = max(0.0, min(1.0, volume))
+
+    def toggle_audio(self):
+        """Toggle audio on/off"""
+        self.enabled = not self.enabled
 
     def _generate_sounds(self):
         """Generate simple procedural sound effects"""
@@ -127,13 +149,18 @@ class AudioSystem(System):
             self.world.destroy_entity(entity)
 
     def play_sound(self, sound_name: str, volume: float = 1.0):
-        """Play a sound effect"""
+        """Play a sound effect with volume control"""
+        if not self.enabled:
+            return
+
         if sound_name not in self.sounds:
             return
 
         sound = self.sounds[sound_name]
         if sound:
-            sound.set_volume(volume)
+            # Apply master and SFX volume
+            final_volume = volume * self.sfx_volume * self.master_volume
+            sound.set_volume(final_volume)
             sound.play()
 
     def play_player_hit(self):
