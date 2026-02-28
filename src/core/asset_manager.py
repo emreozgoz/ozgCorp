@@ -84,11 +84,20 @@ class AssetManager:
         full_path = os.path.join(self.sprites_dir, path)
 
         try:
-            sprite = pygame.image.load(full_path).convert_alpha()
+            sprite = pygame.image.load(full_path)
+            # Try convert_alpha, fall back to plain surface if display not initialized
+            try:
+                sprite = sprite.convert_alpha()
+            except pygame.error:
+                # Display not initialized yet, use raw surface
+                pass
             self.sprites[cache_key] = sprite
             return sprite
         except FileNotFoundError:
             print(f"⚠️  Sprite not found: {full_path}, using placeholder")
+            return self._create_placeholder(32, 32)
+        except Exception as e:
+            print(f"⚠️  Failed to load {cache_key}: {e}")
             return self._create_placeholder(32, 32)
 
     def load_sprite_sheet(self, path: str, frame_width: int, frame_height: int, key: Optional[str] = None) -> SpriteSheet:
