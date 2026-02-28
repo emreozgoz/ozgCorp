@@ -86,13 +86,18 @@ class RenderSystem(System):
                 sprite_image = asset_manager.get_sprite(sprite.sprite_key)
 
             if sprite_image:
-                # RENDER SPRITE IMAGE (Sprint 26: No more circles!)
-                sprite_rect = sprite_image.get_rect(center=(render_x, render_y))
+                # RENDER SPRITE IMAGE (Sprint 26: Real sprites, Sprint 27: 1.5x larger!)
+                # Sprint 27: Scale sprites 1.5x for better visibility
+                SPRITE_SCALE = 1.5
+                scaled_size = (int(sprite_image.get_width() * SPRITE_SCALE),
+                              int(sprite_image.get_height() * SPRITE_SCALE))
+                scaled_sprite = pygame.transform.scale(sprite_image, scaled_size)
+                sprite_rect = scaled_sprite.get_rect(center=(render_x, render_y))
 
                 # Apply hit flash effect
                 if hit_flash and hit_flash.active:
                     # Create white flash surface
-                    flash_surf = sprite_image.copy()
+                    flash_surf = scaled_sprite.copy()
                     flash_surf.fill((255, 255, 255, 180), special_flags=pygame.BLEND_RGB_ADD)
                     self.screen.blit(flash_surf, sprite_rect)
                 else:
@@ -110,8 +115,8 @@ class RenderSystem(System):
                         glow_rect = glow_surf.get_rect(center=(render_x, render_y))
                         self.screen.blit(glow_surf, glow_rect)
 
-                    # Render sprite
-                    self.screen.blit(sprite_image, sprite_rect)
+                    # Render scaled sprite
+                    self.screen.blit(scaled_sprite, sprite_rect)
 
             else:
                 # FALLBACK: Old circle rendering (if sprite not found)

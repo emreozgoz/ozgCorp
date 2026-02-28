@@ -32,7 +32,7 @@ from src.systems.screen_effects import (
 )
 from src.systems.map_system import MapManager, EnvironmentalHazardSystem
 from src.systems.boss_abilities import BossAbilitySystem
-from src.systems.background_system import BackgroundSystem, EnvironmentalParticles
+from src.systems.simple_background import SimpleBackgroundSystem  # Sprint 27: Simplified background
 from src.components.character_classes import *
 from src.components.weapons import *
 from config.settings import *
@@ -137,9 +137,8 @@ class DarkSanctum:
 
     def _init_systems(self):
         """Initialize all game systems"""
-        # Background & Environment (priority 1-2) - Sprint 25
-        self.world.add_system(BackgroundSystem(self.world, self.screen))
-        self.world.add_system(EnvironmentalParticles(self.world, self.screen))
+        # Background (priority 1) - Sprint 27: Simple static background for clarity
+        self.world.add_system(SimpleBackgroundSystem(self.world, self.screen))
 
         # Map System (priority 5)
         self.map_manager = MapManager(self.world)
