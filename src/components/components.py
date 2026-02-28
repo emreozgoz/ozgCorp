@@ -353,6 +353,8 @@ class WeaponInventory(Component):
     def __init__(self):
         # weapon_id -> level (1-5)
         self.weapons = {}  # e.g., {"sword": 2, "magic_missile": 1}
+        # Track evolved weapons
+        self.evolved_weapons = set()  # e.g., {"reapers_embrace"}
 
     def has_weapon(self, weapon_id: str) -> bool:
         return weapon_id in self.weapons
@@ -370,6 +372,22 @@ class WeaponInventory(Component):
             self.weapons[weapon_id] += 1
         else:
             self.weapons[weapon_id] = 1
+
+    def is_evolved(self, weapon_id: str) -> bool:
+        """Check if weapon has been evolved"""
+        return weapon_id in self.evolved_weapons
+
+    def evolve_weapon(self, base_weapon_id: str, evolved_id: str):
+        """Evolve weapon to its final form"""
+        # Remove base weapon, add evolved version
+        if base_weapon_id in self.weapons:
+            del self.weapons[base_weapon_id]
+        self.weapons[evolved_id] = 6  # Evolved weapons are "level 6"
+        self.evolved_weapons.add(evolved_id)
+
+    def can_evolve_weapon(self, weapon_id: str) -> bool:
+        """Check if weapon is at max level and can evolve"""
+        return self.get_level(weapon_id) >= 5 and not self.is_evolved(weapon_id)
 
 
 class WeaponInstance(Component):

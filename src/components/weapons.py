@@ -147,9 +147,54 @@ BLOOD_LANCE = WeaponData(
     color=(200, 30, 30)  # Blood red
 )
 
+# === EVOLVED WEAPONS (Sprint 12) ===
+
+REAPERS_EMBRACE = WeaponData(
+    id="reapers_embrace",
+    name="Reaper's Embrace",
+    description="💀 EVOLVED: Scythe storm of obliteration",
+    icon="💀",
+    max_level=1,  # Evolved weapons don't level further
+    damage_per_level=[210],  # 3x base max (70 * 3)
+    cooldown_per_level=[0.35],  # 0.5x base (0.7 * 0.5)
+    range_per_level=[300],  # 2x base (150 * 2)
+    projectile_count_per_level=[6],  # 2x base (3 + 3)
+    weapon_type="melee",
+    color=(60, 10, 80)  # Deeper dark purple
+)
+
+COSMIC_ANNIHILATION = WeaponData(
+    id="cosmic_annihilation",
+    name="Cosmic Annihilation",
+    description="🌌 EVOLVED: Devastating cosmic barrage",
+    icon="🌌",
+    max_level=1,
+    damage_per_level=[125],  # 2.5x base (50 * 2.5)
+    cooldown_per_level=[0.6],  # 0.6x base (1.0 * 0.6)
+    range_per_level=[900],  # 1.5x base (600 * 1.5)
+    projectile_count_per_level=[10],  # 2x base (5 + 5)
+    weapon_type="projectile",
+    color=(200, 100, 255)  # Bright cosmic purple
+)
+
+SACRED_WARD = WeaponData(
+    id="sacred_ward",
+    name="Sacred Ward",
+    description="✨ EVOLVED: Holy immunity barrier",
+    icon="✨",
+    max_level=1,
+    damage_per_level=[112],  # 4x base (28 * 4)
+    cooldown_per_level=[0.5],  # Same tick
+    range_per_level=[375],  # 2.5x base (150 * 2.5)
+    projectile_count_per_level=[1],
+    weapon_type="aura",
+    color=(255, 255, 200)  # Bright golden
+)
+
 # All available weapons
 ALL_WEAPONS = [SWORD, MAGIC_MISSILE, LIGHTNING_CHAIN, HOLY_WATER, GARLIC,
-               SHADOW_SCYTHE, FROST_NOVA, BLOOD_LANCE]
+               SHADOW_SCYTHE, FROST_NOVA, BLOOD_LANCE,
+               REAPERS_EMBRACE, COSMIC_ANNIHILATION, SACRED_WARD]
 
 # Weapon pool for level up choices
 WEAPON_POOL = {
@@ -160,7 +205,11 @@ WEAPON_POOL = {
     "garlic": GARLIC,
     "shadow_scythe": SHADOW_SCYTHE,
     "frost_nova": FROST_NOVA,
-    "blood_lance": BLOOD_LANCE
+    "blood_lance": BLOOD_LANCE,
+    # Evolved weapons (only accessible via evolution)
+    "reapers_embrace": REAPERS_EMBRACE,
+    "cosmic_annihilation": COSMIC_ANNIHILATION,
+    "sacred_ward": SACRED_WARD
 }
 
 

@@ -701,7 +701,7 @@ class DarkSanctum:
             player.remove_component(LevelUpPending)
 
     def _apply_weapon_choice(self):
-        """Apply selected weapon upgrade"""
+        """Apply selected weapon upgrade or evolution"""
         if not self.level_up_choices:
             self.state = GameState.PLAYING
             return
@@ -717,13 +717,30 @@ class DarkSanctum:
 
         inventory = player_entities[0].get_component(WeaponInventory)
 
-        # Upgrade weapon
-        inventory.upgrade_weapon(weapon_id)
+        # Check if this is an evolution
+        if choice.get('is_evolution', False):
+            evolution_data = choice['evolution_data']
 
-        weapon_data = choice['weapon_data']
-        new_level = inventory.get_level(weapon_id)
+            # Evolve weapon
+            inventory.evolve_weapon(weapon_id, evolution_data.evolved_id)
 
-        print(f"🔼 {weapon_data.icon} {weapon_data.name} → Level {new_level}")
+            # Create evolution announcement
+            print(f"⚡ EVOLUTION! {evolution_data.evolved_icon} {evolution_data.base_weapon_id.upper()} → {evolution_data.evolved_name.upper()}")
+
+            # Play evolution effect
+            from src.systems.particle_system import create_level_up_particles
+            player_pos = player_entities[0].get_component(Position)
+            if player_pos:
+                create_level_up_particles(self.world, player_pos.x, player_pos.y, 80)  # 2x particles
+
+        else:
+            # Regular upgrade
+            inventory.upgrade_weapon(weapon_id)
+
+            weapon_data = choice['weapon_data']
+            new_level = inventory.get_level(weapon_id)
+
+            print(f"🔼 {weapon_data.icon} {weapon_data.name} → Level {new_level}")
 
         # Resume game
         self.state = GameState.PLAYING
@@ -765,67 +782,127 @@ class DarkSanctum:
             x = start_x + i * (card_width + card_spacing)
             is_selected = (i == self.selected_choice_index)
 
-            weapon_data = choice['weapon_data']
-            current_level = choice['current_level']
-            next_level = choice['next_level']
-            is_new = choice['is_new']
+            # Check if this is an evolution choice
+            is_evolution = choice.get('is_evolution', False)
 
-            # Card background
-            card_color = weapon_data.color if is_selected else (40, 35, 50)
-            border_color = COLOR_GOLD if is_selected else (80, 75, 90)
-            border_width = 4 if is_selected else 2
+            if is_evolution:
+                # Evolution card rendering
+                evolution_data = choice['evolution_data']
+                from src.components.weapons import get_weapon_by_id
+                evolved_weapon = get_weapon_by_id(evolution_data.evolved_id)
 
-            card_rect = pygame.Rect(x, start_y, card_width, card_height)
-            pygame.draw.rect(self.screen, card_color, card_rect)
-            pygame.draw.rect(self.screen, border_color, card_rect, border_width)
+                # Card background (special evolution color)
+                card_color = evolved_weapon.color if is_selected else (60, 40, 80)
+                border_color = (255, 215, 0) if is_selected else (200, 150, 50)  # Golden
+                border_width = 6 if is_selected else 3
 
-            # Weapon icon (large emoji)
-            icon_surf = self.title_font.render(weapon_data.icon, True, COLOR_WHITE)
-            icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
-            self.screen.blit(icon_surf, icon_rect)
+                card_rect = pygame.Rect(x, start_y, card_width, card_height)
+                pygame.draw.rect(self.screen, card_color, card_rect)
+                pygame.draw.rect(self.screen, border_color, card_rect, border_width)
 
-            # Weapon name
-            name_surf = self.medium_font.render(weapon_data.name, True, COLOR_WHITE)
-            name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 120))
-            self.screen.blit(name_surf, name_rect)
+                # EVOLUTION banner
+                evo_banner = self.medium_font.render("⚡ EVOLUTION ⚡", True, (255, 215, 0))
+                evo_rect = evo_banner.get_rect(center=(x + card_width // 2, start_y + 30))
+                self.screen.blit(evo_banner, evo_rect)
 
-            # Level indicator
-            if is_new:
-                level_text = "NEW!"
-                level_color = COLOR_GOLD
+                # Evolved icon
+                icon_surf = self.title_font.render(evolution_data.evolved_icon, True, COLOR_WHITE)
+                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 80))
+                self.screen.blit(icon_surf, icon_rect)
+
+                # Evolved name
+                name_surf = self.medium_font.render(evolution_data.evolved_name, True, (255, 215, 0))
+                name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 130))
+                self.screen.blit(name_surf, name_rect)
+
+                # Stats preview
+                damage = evolved_weapon.damage_per_level[0]
+                cooldown = evolved_weapon.cooldown_per_level[0]
+
+                stats_text = [
+                    f"Damage: {int(damage)}",
+                    f"Cooldown: {cooldown:.1f}s",
+                ]
+
+                stat_y = start_y + 170
+                for stat in stats_text:
+                    stat_surf = self.small_font.render(stat, True, (255, 215, 0))
+                    stat_rect = stat_surf.get_rect(center=(x + card_width // 2, stat_y))
+                    self.screen.blit(stat_surf, stat_rect)
+                    stat_y += 25
+
+                # Description
+                desc_lines = self._wrap_text(evolution_data.evolved_description, 28)
+                desc_y = stat_y + 10
+                for line in desc_lines:
+                    desc_surf = self.small_font.render(line, True, (220, 220, 220))
+                    desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
+                    self.screen.blit(desc_surf, desc_rect)
+                    desc_y += 20
+
             else:
-                level_text = f"Lv {current_level} → {next_level}"
-                level_color = COLOR_ARCANE_BLUE
+                # Regular weapon card rendering
+                weapon_data = choice['weapon_data']
+                current_level = choice['current_level']
+                next_level = choice['next_level']
+                is_new = choice['is_new']
 
-            level_surf = self.small_font.render(level_text, True, level_color)
-            level_rect = level_surf.get_rect(center=(x + card_width // 2, start_y + 155))
-            self.screen.blit(level_surf, level_rect)
+                # Card background
+                card_color = weapon_data.color if is_selected else (40, 35, 50)
+                border_color = COLOR_GOLD if is_selected else (80, 75, 90)
+                border_width = 4 if is_selected else 2
 
-            # Stats
-            level_idx = next_level - 1
-            damage = weapon_data.damage_per_level[level_idx]
-            cooldown = weapon_data.cooldown_per_level[level_idx]
+                card_rect = pygame.Rect(x, start_y, card_width, card_height)
+                pygame.draw.rect(self.screen, card_color, card_rect)
+                pygame.draw.rect(self.screen, border_color, card_rect, border_width)
 
-            stats_text = [
-                f"Damage: {int(damage)}",
-                f"Cooldown: {cooldown:.1f}s",
-            ]
+                # Weapon icon (large emoji)
+                icon_surf = self.title_font.render(weapon_data.icon, True, COLOR_WHITE)
+                icon_rect = icon_surf.get_rect(center=(x + card_width // 2, start_y + 60))
+                self.screen.blit(icon_surf, icon_rect)
 
-            stat_y = start_y + 190
-            for stat in stats_text:
-                stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
-                stat_rect = stat_surf.get_rect(center=(x + card_width // 2, stat_y))
-                self.screen.blit(stat_surf, stat_rect)
-                stat_y += 25
+                # Weapon name
+                name_surf = self.medium_font.render(weapon_data.name, True, COLOR_WHITE)
+                name_rect = name_surf.get_rect(center=(x + card_width // 2, start_y + 120))
+                self.screen.blit(name_surf, name_rect)
 
-            # Description
-            desc_lines = self._wrap_text(weapon_data.description, 28)
-            desc_y = stat_y + 10
-            for line in desc_lines:
-                desc_surf = self.small_font.render(line, True, (180, 180, 180))
-                desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
-                self.screen.blit(desc_surf, desc_rect)
-                desc_y += 20
+                # Level indicator
+                if is_new:
+                    level_text = "NEW!"
+                    level_color = COLOR_GOLD
+                else:
+                    level_text = f"Lv {current_level} → {next_level}"
+                    level_color = COLOR_ARCANE_BLUE
+
+                level_surf = self.small_font.render(level_text, True, level_color)
+                level_rect = level_surf.get_rect(center=(x + card_width // 2, start_y + 155))
+                self.screen.blit(level_surf, level_rect)
+
+                # Stats
+                level_idx = next_level - 1
+                damage = weapon_data.damage_per_level[level_idx]
+                cooldown = weapon_data.cooldown_per_level[level_idx]
+
+                stats_text = [
+                    f"Damage: {int(damage)}",
+                    f"Cooldown: {cooldown:.1f}s",
+                ]
+
+                stat_y = start_y + 190
+                for stat in stats_text:
+                    stat_surf = self.small_font.render(stat, True, COLOR_WHITE)
+                    stat_rect = stat_surf.get_rect(center=(x + card_width // 2, stat_y))
+                    self.screen.blit(stat_surf, stat_rect)
+                    stat_y += 25
+
+                # Description
+                desc_lines = self._wrap_text(weapon_data.description, 28)
+                desc_y = stat_y + 10
+                for line in desc_lines:
+                    desc_surf = self.small_font.render(line, True, (180, 180, 180))
+                    desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
+                    self.screen.blit(desc_surf, desc_rect)
+                    desc_y += 20
 
 
 def main():

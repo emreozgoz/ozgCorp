@@ -207,35 +207,61 @@ class LevelUpChoiceSystem(System):
         pass
 
     def generate_choices(self, inventory: WeaponInventory) -> list:
-        """Generate 3 random weapon choices"""
+        """Generate 3 random weapon choices (including evolutions)"""
         choices = []
 
-        # Get available weapons (not maxed out)
+        # Check for evolution opportunities first (priority)
+        from src.components.weapon_evolutions import get_evolution, can_evolve
+        evolution_choices = []
+
+        for weapon_id in inventory.weapons:
+            if inventory.can_evolve_weapon(weapon_id) and can_evolve(weapon_id):
+                evolution_data = get_evolution(weapon_id)
+                if evolution_data:
+                    evolution_choices.append({
+                        'weapon_id': weapon_id,
+                        'evolution_data': evolution_data,
+                        'is_evolution': True
+                    })
+
+        # If evolution available, always include it as first choice
+        if evolution_choices:
+            # Pick one evolution if multiple available
+            evolution_choice = random.choice(evolution_choices)
+            choices.append(evolution_choice)
+
+        # Get available weapons (not maxed out, exclude evolved weapons)
         available = []
         for weapon_data in ALL_WEAPONS:
+            # Skip evolved weapon forms (they're only accessible via evolution)
+            if weapon_data.id in ['reapers_embrace', 'cosmic_annihilation', 'sacred_ward']:
+                continue
+
             current_level = inventory.get_level(weapon_data.id)
             if current_level < weapon_data.max_level:
                 available.append(weapon_data)
 
-        # If no weapons available, return empty
+        # If no weapons available, return evolution only
         if not available:
-            return []
+            return choices
 
-        # Select 3 random weapons
-        num_choices = min(3, len(available))
-        selected = random.sample(available, num_choices)
+        # Select remaining choices from available weapons
+        num_remaining = min(3 - len(choices), len(available))
+        if num_remaining > 0:
+            selected = random.sample(available, num_remaining)
 
-        for weapon_data in selected:
-            current_level = inventory.get_level(weapon_data.id)
-            next_level = current_level + 1
+            for weapon_data in selected:
+                current_level = inventory.get_level(weapon_data.id)
+                next_level = current_level + 1
 
-            choices.append({
-                'weapon_id': weapon_data.id,
-                'weapon_data': weapon_data,
-                'current_level': current_level,
-                'next_level': next_level,
-                'is_new': current_level == 0
-            })
+                choices.append({
+                    'weapon_id': weapon_data.id,
+                    'weapon_data': weapon_data,
+                    'current_level': current_level,
+                    'next_level': next_level,
+                    'is_new': current_level == 0,
+                    'is_evolution': False
+                })
 
         return choices
 
