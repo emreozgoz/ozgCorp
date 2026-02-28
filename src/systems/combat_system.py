@@ -240,6 +240,7 @@ class DamageOnContactSystem(System):
                             if e1.has_component(GameStats):
                                 stats = e1.get_component(GameStats)
                                 stats.damage_taken += damage2.amount
+                                stats.last_damage_time = stats.survival_time  # Sprint 19
 
                     if not e2.has_component(Invulnerable):
                         health2.damage(damage1.amount)
@@ -249,6 +250,7 @@ class DamageOnContactSystem(System):
                             if e2.has_component(GameStats):
                                 stats = e2.get_component(GameStats)
                                 stats.damage_taken += damage1.amount
+                                stats.last_damage_time = stats.survival_time  # Sprint 19
 
                     # Set cooldown (0.5s between damage ticks)
                     self.damage_cooldown[key] = 0.5

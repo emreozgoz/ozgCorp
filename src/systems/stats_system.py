@@ -26,6 +26,10 @@ class GameStats(Component):
         self.highest_wave = 0
         self.session_start_time = datetime.now()
         self.survival_time = 0.0
+        # Sprint 19: New stat tracking
+        self.weapons_evolved = 0
+        self.no_damage_streak = 0.0  # Time without taking damage
+        self.last_damage_time = 0.0
 
     def get_survival_time_str(self) -> str:
         """Format survival time as MM:SS"""
@@ -156,6 +160,10 @@ class StatsTrackingSystem(System):
         # Update survival time
         stats.survival_time += dt
 
+        # Update no-damage streak (Sprint 19)
+        if stats.survival_time - stats.last_damage_time > stats.no_damage_streak:
+            stats.no_damage_streak = stats.survival_time - stats.last_damage_time
+
 
 class AchievementSystem(System):
     """Check for and unlock achievements"""
@@ -210,6 +218,42 @@ class AchievementSystem(System):
             "name": "Wave Warrior",
             "description": "Reach wave 20",
             "check": lambda stats: stats.highest_wave >= 20
+        },
+        # Sprint 19: New Achievements
+        "legend": {
+            "name": "Legend",
+            "description": "Reach wave 30",
+            "check": lambda stats: stats.highest_wave >= 30
+        },
+        "god_slayer": {
+            "name": "God Slayer",
+            "description": "Defeat 25 bosses",
+            "check": lambda stats: stats.bosses_killed >= 25
+        },
+        "unstoppable": {
+            "name": "Unstoppable",
+            "description": "Survive 30 minutes",
+            "check": lambda stats: stats.survival_time >= 1800
+        },
+        "arsenal_master": {
+            "name": "Arsenal Master",
+            "description": "Evolve a weapon",
+            "check": lambda stats: hasattr(stats, 'weapons_evolved') and stats.weapons_evolved >= 1
+        },
+        "damage_dealer": {
+            "name": "Damage Dealer",
+            "description": "Deal 50,000 damage",
+            "check": lambda stats: stats.damage_dealt >= 50000
+        },
+        "tank": {
+            "name": "Tank",
+            "description": "Take 10,000 damage and survive",
+            "check": lambda stats: stats.damage_taken >= 10000
+        },
+        "perfectionist": {
+            "name": "Perfectionist",
+            "description": "Complete a run without taking damage for 5 minutes",
+            "check": lambda stats: hasattr(stats, 'no_damage_streak') and stats.no_damage_streak >= 300
         }
     }
 

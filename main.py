@@ -728,6 +728,12 @@ class DarkSanctum:
             # Evolve weapon
             inventory.evolve_weapon(weapon_id, evolution_data.evolved_id)
 
+            # Track evolution stat (Sprint 19)
+            from src.systems.stats_system import GameStats
+            if player_entities[0].has_component(GameStats):
+                stats = player_entities[0].get_component(GameStats)
+                stats.weapons_evolved += 1
+
             # Create evolution announcement
             print(f"⚡ EVOLUTION! {evolution_data.evolved_icon} {evolution_data.base_weapon_id.upper()} → {evolution_data.evolved_name.upper()}")
 
