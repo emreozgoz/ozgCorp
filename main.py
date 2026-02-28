@@ -401,7 +401,7 @@ class DarkSanctum:
         GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
 
         instructions = [
-            "← → to select difficulty",
+            "LEFT/RIGHT to select difficulty",
             "Press SPACE to Continue"
         ]
 
@@ -484,7 +484,7 @@ class DarkSanctum:
         inst_panel_rect = pygame.Rect(WINDOW_WIDTH // 2 - 350, WINDOW_HEIGHT - 90, 700, 60)
         GothicPanel.draw(self.screen, inst_panel_rect, GOTHIC_SHADOW, GOTHIC_PURPLE, BORDER_THIN)
 
-        inst_text = "← → to Select | SPACE to Confirm | ESC to Back"
+        inst_text = "LEFT/RIGHT to Select | SPACE to Confirm | ESC to Back"
         inst_surf = self.medium_font.render(inst_text, True, GOTHIC_SILVER)
         inst_rect = inst_surf.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 60))
         self.screen.blit(inst_surf, inst_rect)
@@ -782,8 +782,8 @@ class DarkSanctum:
         # Gothic title
         GothicHeader.draw(self.screen, "LEVEL UP!", 60, self.large_font, GOTHIC_GOLD, decoration=True)
 
-        # Instructions
-        inst = self.small_font.render("← → to Select | SPACE to Choose", True, GOTHIC_SILVER)
+        # Instructions (Sprint 28: Replace arrow emojis with text)
+        inst = self.small_font.render("LEFT/RIGHT to Select | SPACE to Choose", True, GOTHIC_SILVER)
         inst_rect = inst.get_rect(center=(WINDOW_WIDTH // 2, 115))
         self.screen.blit(inst, inst_rect)
 
@@ -940,6 +940,34 @@ class DarkSanctum:
                     desc_rect = desc_surf.get_rect(center=(x + card_width // 2, desc_y))
                     self.screen.blit(desc_surf, desc_rect)
                     desc_y += 20
+
+        # Sprint 28: Visual arrow indicators (pixel art triangles)
+        arrow_y = start_y + card_height // 2
+        arrow_size = 40
+
+        # Left arrow (if not first card)
+        if self.selected_choice_index > 0:
+            # Draw left-pointing triangle
+            left_arrow_x = start_x - 80
+            left_points = [
+                (left_arrow_x, arrow_y),                        # Left point
+                (left_arrow_x + arrow_size, arrow_y - arrow_size // 2),  # Top
+                (left_arrow_x + arrow_size, arrow_y + arrow_size // 2)   # Bottom
+            ]
+            pygame.draw.polygon(self.screen, GOTHIC_GOLD, left_points)
+            pygame.draw.polygon(self.screen, GOTHIC_BONE, left_points, 3)  # Border
+
+        # Right arrow (if not last card)
+        if self.selected_choice_index < len(self.level_up_choices) - 1:
+            # Draw right-pointing triangle
+            right_arrow_x = start_x + (len(self.level_up_choices) * (card_width + card_spacing)) - card_spacing + 40
+            right_points = [
+                (right_arrow_x + arrow_size, arrow_y),          # Right point
+                (right_arrow_x, arrow_y - arrow_size // 2),     # Top
+                (right_arrow_x, arrow_y + arrow_size // 2)      # Bottom
+            ]
+            pygame.draw.polygon(self.screen, GOTHIC_GOLD, right_points)
+            pygame.draw.polygon(self.screen, GOTHIC_BONE, right_points, 3)  # Border
 
 
 def main():
