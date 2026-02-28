@@ -26,20 +26,29 @@ Created by **Matrix AI Team** - 18 autonomous AI agents working together in perf
 - **Boss Fights** - Epic Blood Titan every 5 waves (10x health, 2x damage)
 - **Particle Effects** - Satisfying visual feedback on hits and deaths
 
-### Character Classes (3 Unique)
+### Character Classes (5 Unique)
 1. **Shadow Knight** - Balanced warrior (HP: 100, DMG: 10, SPD: 250)
    - Passive: Shadow Step - Dash cooldown -25%
 2. **Blood Mage** - Glass cannon caster (HP: 70, DMG: 15, SPD: 220)
    - Passive: Blood Magic - Abilities +50% damage
 3. **Void Guardian** - Tank defender (HP: 150, DMG: 7, SPD: 200)
    - Passive: Iron Will - Take 25% less damage
+4. **Necromancer** - Death cultist (HP: 85, DMG: 12, SPD: 230)
+   - Passive: Soul Harvest - Weapons deal +10% damage per kill (5 stacks)
+5. **Tempest Ranger** - Swift archer (HP: 90, DMG: 9, SPD: 270)
+   - Passive: Wind Walker - Projectile weapons fire 30% faster
 
-### Enemy Types (4 + Boss)
+### Enemy Types (4 + 5 Bosses)
 1. **Basic Enemy** - Standard threat (60% spawn rate)
 2. **Imp** - Fast swarmer (20% spawn rate) - 1.5x speed, low HP
 3. **Golem** - Tank blocker (15% spawn rate) - 3x HP, slow
 4. **Wraith** - Ranged shooter (5% spawn rate) - Keeps distance, fires projectiles
-5. **Blood Titan** - Boss (every 5 waves) - 10x HP, 2x damage, special glow
+5. **5 Unique Bosses** (every 5 waves with rotation):
+   - 💀 **Blood Titan** (Wave 5) - Tank boss (10x HP, 2x damage)
+   - 👤 **Void Reaver** (Wave 10) - Teleports + invulnerability
+   - ❄️ **Frost Colossus** (Wave 15) - Slow aura (50% in 300px)
+   - ☠️ **Plague Herald** (Wave 20) - Summons 3 imps
+   - 🔥 **Inferno Lord** (Wave 25+) - Rage mode (<30% HP)
 
 ---
 
@@ -144,7 +153,7 @@ This game was developed by **18 specialized AI agents** working autonomously:
 
 ## 📊 Development Progress
 
-**✅ GAME COMPLETE - v1.0 RELEASED - 13 SPRINTS DELIVERED**
+**✅ GAME COMPLETE - v2.0 RELEASED - 17 SPRINTS DELIVERED**
 
 **Sprint 1: Core MVP** ✅
 - ECS Architecture
@@ -282,6 +291,55 @@ This game was developed by **18 specialized AI agents** working autonomously:
   - Level up, Projectile fire
 - Lightweight procedural generation (no audio files)
 
+**Sprint 14: Content Expansion - Massive Arsenal** ✅
+- 2 New character classes (Total: 5):
+  - 💀 Necromancer - Soul Harvest (+10% damage per kill, 5 stacks)
+  - 🌪️ Tempest Ranger - Wind Walker (30% faster projectiles)
+- 5 New base weapons (Total: 13):
+  - 👻 Soul Reaver - Life-drain projectiles
+  - 🦴 Bone Storm - Rapid orbiting bones
+  - 📖 Cursed Tome - Explosive sigils
+  - 🗡️ Venom Fang - Rapid poison daggers
+  - 🌑 Void Lance - Massive piercing projectiles
+- 2 New weapon evolutions (Total: 5):
+  - ⚡ Storm Bringer (from Chain Lightning)
+  - ❄️ Absolute Zero (from Frost Orb)
+- Total: 18 weapons (13 base + 5 evolved)
+
+**Sprint 15: Boss Variety System** ✅
+- 5 Unique boss types with rotation:
+  - 💀 Blood Titan (Wave 5) - Classic tank boss
+  - 👤 Void Reaver (Wave 10) - Fast assassin
+  - ❄️ Frost Colossus (Wave 15) - Tankiest boss
+  - ☠️ Plague Herald (Wave 20) - Summoner
+  - 🔥 Inferno Lord (Wave 25+) - Enrage mechanic
+- Boss rotation system (different boss each encounter)
+- Unique visual identity per boss (color, glow, size)
+- Boss-specific stat multipliers (HP, damage, speed)
+- Guaranteed power-up drop from all bosses
+- Boss rotation cycles after Wave 25
+
+**Sprint 16: Environmental Hazards** ✅ (Previously Sprint 10)
+- 3 Unique maps with hazards:
+  - 🏰 Dark Sanctum - No hazards (tutorial map)
+  - ⛪ Blood Cathedral - Blood pools (5 dmg/s)
+  - 🗝️ Cursed Crypts - Spike traps (20 dmg every 2s)
+- Environmental damage system
+- Spike trap timing mechanics (2s active, 2s inactive)
+- Map-based achievement unlocking
+- Strategic positioning challenges
+
+**Sprint 17: Boss Abilities - Epic Mechanics** ✅
+- 4 Unique boss special abilities:
+  - 👤 Void Reaver: Teleport every 3s + 0.5s invulnerability
+  - ❄️ Frost Colossus: 50% slow aura (300px radius)
+  - ☠️ Plague Herald: Summon 3 imps every 5s
+  - 🔥 Inferno Lord: Rage mode at <30% HP (+50% damage/speed)
+- Boss ability system with cooldown tracking
+- Unique tactics required per boss
+- Visual/audio feedback for all abilities
+- Each boss provides different challenge
+
 ---
 
 ## 🎯 What Makes Dark Sanctum Different?
@@ -292,13 +350,13 @@ Unlike Vampire Survivors:
 |---------|------------------|--------------|
 | Combat | Passive auto-attack only | Auto-attack + 4 active abilities |
 | Positioning | Less important | Tactical positioning matters |
-| Characters | Generic survivor | 3 unique character classes |
-| Weapons | 8 base weapons | 8 base + 3 evolved = 11 total |
-| Maps | Single map | 3 maps with unique hazards |
-| Bosses | Rare | Epic boss every 5 waves |
+| Characters | Generic survivor | 5 unique character classes |
+| Weapons | ~15 weapons | 18 total (13 base + 5 evolved) |
+| Maps | Single map | 3 maps with environmental hazards |
+| Bosses | Rare, repetitive | 5 unique bosses with special abilities |
 | Theme | Cute pixel art | Dark gothic horror |
-| Abilities | Passive synergies | Active skill combos |
-| Progression | Weapon upgrades only | Weapons + Evolutions + Achievements |
+| Abilities | Passive synergies | Active skill combos (Q/W/E/R) |
+| Progression | Weapon upgrades only | Weapons + Evolutions + Achievements + Stats |
 
 ---
 
