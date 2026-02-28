@@ -144,7 +144,7 @@ This game was developed by **18 specialized AI agents** working autonomously:
 
 ## 📊 Development Progress
 
-**✅ GAME COMPLETE - 8 SPRINTS DELIVERED**
+**✅ GAME COMPLETE - v1.0 RELEASED - 13 SPRINTS DELIVERED**
 
 **Sprint 1: Core MVP** ✅
 - ECS Architecture
@@ -234,6 +234,54 @@ This game was developed by **18 specialized AI agents** working autonomously:
   - Highest level/wave records
 - dark_sanctum_stats.json persistent storage
 
+**Sprint 9: Pause Menu & Game Flow** ✅
+- Comprehensive pause menu system
+- Resume, Restart, Settings, Main Menu options
+- Dark gothic pause overlay
+- Smooth state transitions
+- Keyboard navigation (Arrow keys + Enter)
+
+**Sprint 10: Multiple Game Maps** ✅
+- 3 Unique environments with hazards:
+  - 🏰 Blood Cathedral - Blood pools (poison damage)
+  - 🌲 Cursed Forest - Shadow trees (vision obstruction)
+  - ☠️ Bone Wastes - Bone spikes (physical damage)
+- Map selection screen before character selection
+- Environmental hazards with damage-over-time
+- Unique visual themes per map
+
+**Sprint 11: Expanded Weapon Arsenal** ✅
+- 3 New weapons added (Total: 8 base weapons):
+  - 🗡️ Death's Scythe - Massive rotating melee
+  - ❄️ Frost Orb - Ice projectiles with slow
+  - 🔱 Crimson Spear - Piercing blood lances
+- Enhanced weapon variety for builds
+- Unique mechanics per weapon type
+
+**Sprint 12: Weapon Evolution System** ✅
+- Vampire Survivors-style weapon evolutions
+- 3 Evolved weapons unlocked at Level 5:
+  - 💀 Reaper's Embrace (from Shadow Blade)
+  - 🌌 Cosmic Annihilation (from Arcane Seeker)
+  - ✨ Sacred Ward (from Garlic Aura)
+- Evolved weapons have 2-4x base stats
+- Special evolution UI with golden borders
+- "⚡ EVOLUTION ⚡" banner on level-up
+- Automatic evolution priority in choices
+
+**Sprint 13: Audio Enhancement** ✅
+- Volume control system:
+  - Master volume (0.0-1.0)
+  - SFX volume control
+  - Music volume control
+- Audio toggle on/off
+- Volume multiplier system (base × sfx × master)
+- 6 procedural sound effects:
+  - Player hit, Enemy death
+  - Ability cast, Boss spawn
+  - Level up, Projectile fire
+- Lightweight procedural generation (no audio files)
+
 ---
 
 ## 🎯 What Makes Dark Sanctum Different?
@@ -244,10 +292,13 @@ Unlike Vampire Survivors:
 |---------|------------------|--------------|
 | Combat | Passive auto-attack only | Auto-attack + 4 active abilities |
 | Positioning | Less important | Tactical positioning matters |
-| Characters | Generic survivor | 8 unique character classes |
-| Bosses | Rare | Epic boss every 5 minutes |
+| Characters | Generic survivor | 3 unique character classes |
+| Weapons | 8 base weapons | 8 base + 3 evolved = 11 total |
+| Maps | Single map | 3 maps with unique hazards |
+| Bosses | Rare | Epic boss every 5 waves |
 | Theme | Cute pixel art | Dark gothic horror |
 | Abilities | Passive synergies | Active skill combos |
+| Progression | Weapon upgrades only | Weapons + Evolutions + Achievements |
 
 ---
 
