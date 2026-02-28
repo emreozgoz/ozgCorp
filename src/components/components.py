@@ -388,6 +388,27 @@ class LevelUpPending(Component):
         self.choices = []  # List of 3 weapon options
 
 
+# === MAP COMPONENTS ===
+
+class CurrentMap(Component):
+    """Tracks current active map"""
+
+    def __init__(self, map_id: str):
+        self.map_id = map_id
+
+
+class EnvironmentalHazard(Component):
+    """Environmental hazard that damages player"""
+
+    def __init__(self, hazard_type: str, damage: float, damage_interval: float):
+        self.hazard_type = hazard_type  # "blood_pool", "spike_trap"
+        self.damage = damage
+        self.damage_interval = damage_interval
+        self.time_since_damage = 0.0
+        self.is_active = True  # For spike traps (toggle on/off)
+        self.active_timer = 0.0  # Spike trap timing
+
+
 # === GAME DESIGNER NOTE ===
 # Components are pure data - no logic
 # Logic lives in Systems

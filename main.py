@@ -30,16 +30,19 @@ from src.systems.stats_system import (
 from src.systems.screen_effects import (
     ScreenEffectsSystem, HitFlashSystem, DamageNumberSystem
 )
+from src.systems.map_system import MapManager, EnvironmentalHazardSystem
 from src.components.character_classes import *
 from src.components.weapons import *
 from config.settings import *
 from config.difficulty import Difficulty, DifficultySettings
+from config.maps import *
 
 
 class GameState:
     """Game state management"""
     MENU = "menu"
     CLASS_SELECT = "class_select"
+    MAP_SELECT = "map_select"
     PLAYING = "playing"
     PAUSED = "paused"
     LEVEL_UP = "level_up"  # Weapon selection
@@ -86,6 +89,10 @@ class DarkSanctum:
         self.selected_difficulty_index = 1  # Start on NORMAL
         self.difficulties = [Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD]
 
+        # Map selection
+        self.selected_map_index = 0
+        self.selected_map_id = "dark_sanctum"  # Default: no hazards (change to "blood_cathedral" or "cursed_crypts" for hazards)
+
         # Level-up choices
         self.level_up_choices = []
         self.selected_choice_index = 0
@@ -127,6 +134,11 @@ class DarkSanctum:
 
     def _init_systems(self):
         """Initialize all game systems"""
+        # Map System (priority 5)
+        self.map_manager = MapManager(self.world)
+        self.world.add_system(self.map_manager)
+        self.map_manager.set_map(self.selected_map_id)
+
         # Screen Effects (priority 5)
         self.world.add_system(ScreenEffectsSystem(self.world))
 
@@ -142,6 +154,9 @@ class DarkSanctum:
 
         # AI (priority 25)
         self.world.add_system(AISystem(self.world))
+
+        # Environmental Hazards (priority 30)
+        self.world.add_system(EnvironmentalHazardSystem(self.world))
 
         # Combat (priority 30-40)
         self.world.add_system(AutoAttackSystem(self.world))
