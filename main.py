@@ -31,6 +31,7 @@ from src.systems.screen_effects import (
     ScreenEffectsSystem, HitFlashSystem, DamageNumberSystem
 )
 from src.systems.map_system import MapManager, EnvironmentalHazardSystem
+from src.systems.boss_abilities import BossAbilitySystem
 from src.components.character_classes import *
 from src.components.weapons import *
 from config.settings import *
@@ -154,6 +155,9 @@ class DarkSanctum:
 
         # AI (priority 25)
         self.world.add_system(AISystem(self.world))
+
+        # Boss Abilities (priority 28)
+        self.world.add_system(BossAbilitySystem(self.world))
 
         # Environmental Hazards (priority 30)
         self.world.add_system(EnvironmentalHazardSystem(self.world))
