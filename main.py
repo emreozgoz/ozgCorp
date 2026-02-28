@@ -413,7 +413,7 @@ class DarkSanctum:
             y_offset += 30
 
         # Credits
-        credit = self.small_font.render("Created by Matrix AI Team", True, GOTHIC_MIST)
+        credit = self.small_font.render("Created by Emre ÖZGÖZ", True, GOTHIC_MIST)
         credit_rect = credit.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30))
         self.screen.blit(credit, credit_rect)
 
@@ -1023,7 +1023,7 @@ def main():
     print("\n" + "=" * 70)
     print("🌙 DARK SANCTUM 🌙")
     print("=" * 70)
-    print("A tactical survival game by Matrix AI Team")
+    print("A tactical survival game by Emre ÖZGÖZ")
     print("Inspired by Vampire Survivors with unique mechanics")
     print("=" * 70 + "\n")
 
