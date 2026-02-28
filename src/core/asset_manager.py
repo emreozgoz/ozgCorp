@@ -160,9 +160,9 @@ class AssetManager:
         center = (size // 2, size // 2)
 
         if weapon_id == "arcane_seeker":
-            # Purple crystal orb with sparkles
+            # Purple crystal orb with sparkles (BRIGHTER colors for visibility)
             # Outer glow
-            pygame.draw.circle(surface, (80, 40, 160, 100), center, 14)
+            pygame.draw.circle(surface, (120, 80, 220), center, 14)
             # Main crystal
             pygame.draw.circle(surface, (120, 80, 200), center, 12)
             pygame.draw.circle(surface, (180, 140, 255), center, 8)
@@ -175,16 +175,16 @@ class AssetManager:
                 pygame.draw.circle(surface, (255, 255, 255), pos, 1)
 
         elif weapon_id == "blood_whip":
-            # Red curved blade/whip
+            # Red curved blade/whip (BRIGHTER for visibility)
             # Handle (bottom)
-            pygame.draw.rect(surface, (50, 20, 20), (12, 20, 8, 10))
-            # Blade curve (dark to bright red)
+            pygame.draw.rect(surface, (80, 40, 40), (12, 20, 8, 10))
+            # Blade curve (bright red)
             blade_points = [(16, 20), (20, 15), (24, 10), (26, 6), (24, 4)]
-            pygame.draw.lines(surface, (139, 0, 0), False, blade_points, 4)
-            pygame.draw.lines(surface, (180, 20, 20), False, blade_points, 2)
+            pygame.draw.lines(surface, (220, 40, 40), False, blade_points, 4)
+            pygame.draw.lines(surface, (255, 80, 80), False, blade_points, 2)
             # Blood drips
-            pygame.draw.circle(surface, (139, 0, 0), (22, 12), 2)
-            pygame.draw.circle(surface, (139, 0, 0), (18, 16), 1)
+            pygame.draw.circle(surface, (200, 0, 0), (22, 12), 2)
+            pygame.draw.circle(surface, (180, 20, 20), (18, 16), 1)
 
         elif weapon_id == "lightning_orb":
             # Yellow lightning bolt
@@ -201,22 +201,22 @@ class AssetManager:
                 pygame.draw.line(surface, (255, 255, 200), pos, (pos[0]+2, pos[1]+2), 1)
 
         elif weapon_id == "toxic_cloud":
-            # Green poison flask with bubbles
+            # Green poison flask with bubbles (BRIGHTER for visibility)
             # Flask body
-            pygame.draw.rect(surface, (60, 150, 60), (10, 14, 12, 14), border_radius=2)
+            pygame.draw.rect(surface, (100, 200, 100), (10, 14, 12, 14), border_radius=2)
             # Flask neck
-            pygame.draw.rect(surface, (50, 120, 50), (13, 10, 6, 6))
+            pygame.draw.rect(surface, (80, 160, 80), (13, 10, 6, 6))
             # Cork/cap
-            pygame.draw.rect(surface, (139, 69, 19), (13, 8, 6, 3))
-            # Liquid inside (lighter green)
-            pygame.draw.rect(surface, (80, 200, 80), (11, 16, 10, 10))
+            pygame.draw.rect(surface, (180, 120, 60), (13, 8, 6, 3))
+            # Liquid inside (bright green)
+            pygame.draw.rect(surface, (140, 255, 140), (11, 16, 10, 10))
             # Bubbles
             bubble_positions = [(14, 18), (18, 20), (15, 24)]
             for pos in bubble_positions:
-                pygame.draw.circle(surface, (120, 255, 120), pos, 2)
-                pygame.draw.circle(surface, (200, 255, 200), pos, 1)
+                pygame.draw.circle(surface, (180, 255, 180), pos, 2)
+                pygame.draw.circle(surface, (240, 255, 240), pos, 1)
             # Skull symbol (small)
-            pygame.draw.circle(surface, (40, 100, 40), (16, 20), 3)
+            pygame.draw.circle(surface, (80, 140, 80), (16, 20), 3)
 
         elif weapon_id == "holy_barrier":
             # Golden shield with cross
