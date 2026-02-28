@@ -22,6 +22,7 @@ class WaveSpawnSystem(System):
         self.time_since_wave = 0.0
         self.current_wave = 0
         self.enemies_this_wave = WAVE_INITIAL_ENEMIES
+        self.boss_wave_count = 0  # Track how many boss waves (Sprint 15)
 
     def update(self, dt: float):
         """Update spawn timer"""
@@ -57,8 +58,9 @@ class WaveSpawnSystem(System):
 
         if is_boss_wave:
             # Spawn boss
-            self._spawn_boss(player_pos)
-            print(f"💀 WAVE {self.current_wave} - BOSS WAVE!")
+            self.boss_wave_count += 1
+            self._spawn_boss(player_pos, self.boss_wave_count)
+            print(f"💀 WAVE {self.current_wave} - BOSS WAVE #{self.boss_wave_count}!")
         else:
             # Spawn varied enemies (60% basic, 20% fast, 15% tank, 5% ranged)
             for i in range(int(self.enemies_this_wave)):
@@ -106,8 +108,12 @@ class WaveSpawnSystem(System):
         factory = EntityFactory(self.world)
         factory.create_enemy(x, y, enemy_type=enemy_type, is_elite=is_elite)
 
-    def _spawn_boss(self, player_pos: Position):
-        """Spawn boss enemy"""
+    def _spawn_boss(self, player_pos: Position, boss_wave_number: int):
+        """Spawn boss enemy (Sprint 15: Boss variety)"""
+        # Get boss data from rotation
+        from config.bosses import get_boss_for_wave
+        boss_data = get_boss_for_wave(boss_wave_number)
+
         # Spawn in front of player
         angle = random.uniform(0, 2 * math.pi)
         distance = 400  # Fixed distance
@@ -121,21 +127,25 @@ class WaveSpawnSystem(System):
 
         # Create boss entity
         boss = self.world.create_entity()
-        boss_size = ENEMY_SIZE * BOSS_SIZE_MULTIPLIER
+        boss_size = ENEMY_SIZE * boss_data.size_multiplier
 
         boss.add_component(Position(x, y))
         boss.add_component(Velocity(0, 0))
         boss.add_component(Size(boss_size, boss_size))
-        boss.add_component(Sprite(BOSS_COLOR, radius=boss_size / 2))
-        boss.add_component(Health(ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER))
-        boss.add_component(Damage(ENEMY_BASE_DAMAGE * BOSS_DAMAGE_MULTIPLIER))
+        boss.add_component(Sprite(boss_data.color, radius=boss_size / 2, glow_color=boss_data.glow_color))
+        boss.add_component(Health(ENEMY_BASE_HEALTH * boss_data.health_multiplier))
+        boss.add_component(Damage(ENEMY_BASE_DAMAGE * boss_data.damage_multiplier))
         boss.add_component(Team("enemy"))
         boss.add_component(Enemy(
-            xp_value=ENEMY_XP_VALUE * BOSS_XP_MULTIPLIER,
-            is_boss=True
+            xp_value=int(ENEMY_XP_VALUE * boss_data.xp_multiplier),
+            is_boss=True,
+            boss_id=boss_data.id
         ))
-        boss.add_component(AIChase(speed=ENEMY_BASE_SPEED * BOSS_SPEED_MULTIPLIER))
+        boss.add_component(AIChase(speed=ENEMY_BASE_SPEED * boss_data.speed_multiplier))
         boss.add_component(Tag("boss"))
+
+        # Guaranteed power-up drop (Sprint 15)
+        boss.add_component(GuaranteedDrop(drop_type="powerup"))
 
         # Boss spawn sound
         audio_event = self.world.create_entity()
@@ -145,7 +155,7 @@ class WaveSpawnSystem(System):
         from src.systems.screen_effects import trigger_screen_shake
         trigger_screen_shake(self.world, 15.0, 0.5)
 
-        print(f"💀 BLOOD TITAN SPAWNED! Health: {ENEMY_BASE_HEALTH * BOSS_HEALTH_MULTIPLIER}")
+        print(f"{boss_data.icon} {boss_data.name.upper()} SPAWNED! HP: {int(ENEMY_BASE_HEALTH * boss_data.health_multiplier)}")
 
 
 class AISystem(System):
@@ -288,15 +298,18 @@ class DeathSystem(System):
                     audio_event = self.world.create_entity()
                     audio_event.add_component(AudioEvent('enemy_death'))
 
-                    # Spawn power-up (guaranteed for elites, chance for regular)
+                    # Spawn power-up (guaranteed for elites/bosses, chance for regular)
                     pos = entity.get_component(Position)
+                    guaranteed_drop = entity.get_component(GuaranteedDrop)  # Sprint 15
                     multipliers = DifficultySettings.get_multipliers()
-                    should_drop = enemy.is_elite or (random.random() < multipliers['powerup_drop_chance'])
+                    should_drop = enemy.is_elite or guaranteed_drop or (random.random() < multipliers['powerup_drop_chance'])
                     if pos and should_drop:
                         from src.systems.powerup_system import spawn_powerup
                         spawn_powerup(self.world, pos.x, pos.y)
                         if enemy.is_elite:
                             print(f"⭐ ELITE DEFEATED! Guaranteed drop spawned!")
+                        elif enemy.is_boss:
+                            print(f"👑 BOSS DEFEATED! Guaranteed power-up dropped!")
 
                 # Player death sound
                 player = entity.get_component(Player)

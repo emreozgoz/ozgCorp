@@ -181,11 +181,12 @@ class Abilities(Component):
 class Enemy(Component):
     """Marks entity as enemy"""
 
-    def __init__(self, xp_value: int, is_boss: bool = False, enemy_type: str = "basic", is_elite: bool = False):
+    def __init__(self, xp_value: int, is_boss: bool = False, enemy_type: str = "basic", is_elite: bool = False, boss_id: str = None):
         self.xp_value = xp_value
         self.is_boss = is_boss
         self.enemy_type = enemy_type  # "basic", "fast", "tank", "ranged"
         self.is_elite = is_elite  # Elite variant (2x HP, 1.5x damage, guaranteed drop)
+        self.boss_id = boss_id  # Boss type ID from bosses.py (Sprint 15)
 
 
 class AIChase(Component):
@@ -343,6 +344,13 @@ class PowerUp(Component):
         """Return True if expired"""
         self.elapsed += dt
         return self.elapsed >= self.lifetime
+
+
+class GuaranteedDrop(Component):
+    """Marks entity to drop loot on death (Sprint 15)"""
+
+    def __init__(self, drop_type: str = "powerup"):
+        self.drop_type = drop_type  # "powerup", "weapon", etc.
 
 
 # === WEAPON COMPONENTS ===
